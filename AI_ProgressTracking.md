@@ -79,3 +79,10 @@
 - Files touched: `README.md`, `Backend/README.md`, `Frontend/README.md`, `AI_CarryOn.md`, `AI_ProgressTracking.md`
 - Decisions: Document Windows PowerShell `npm.cmd` usage explicitly and treat the repository as publish-ready once the first push succeeds.
 - Next action: Commit the initial repository state, add the GitHub remote, and push `main`.
+
+### 2026-04-17 17:20
+
+- Summary: Fixed the remaining stale frontend browser title, created the initial commit, connected the GitHub remote, and pushed `main` to the public repository.
+- Files touched: `Frontend/index.html`, `Backend/public/dist/`, `AI_CarryOn.md`, `AI_ProgressTracking.md`
+- Decisions: Treat `939953b` as the initial published baseline and keep AI carry-on git metadata aligned with the live remote repository.
+- Next action: Use this repository as the source template for the next project and replace the sample `TemplateItems` flow.

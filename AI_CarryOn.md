@@ -5,7 +5,7 @@
 
 ## Current Goal
 
-This repository is now a reusable full-stack template and is being finalized for GitHub publication.
+This repository is now a reusable full-stack template and has been published to GitHub.
 
 Current primary target:
 
@@ -80,17 +80,14 @@ Current primary target:
 
 - Git is initialized in the workspace root: `c:\data\FullStackTemplate_Fastify_React`
 - Current branch: `main`
-- Remote: not configured yet
-- Commits: none yet, the repository is still at its initial uncommitted state
+- Tracking remote: `origin`
+- Remote URL: `https://github.com/OteEnded/OteFullStackTemplate_Fastify_React.git`
+- Initial published baseline commit: `939953b` (`OteEnded[feat]: add initial fastify react fullstack template`)
 
-Current untracked working tree:
+State after the first publish:
 
-- `.gitignore`
-- `AI_CarryOn.md`
-- `AI_ProgressTracking.md`
-- `Backend/`
-- `Frontend/`
-- `README.md`
+- `main` is pushed to `origin/main`
+- The repository is ready to clone and use as a starting point
 
 Notes:
 
@@ -119,11 +116,11 @@ Git workflow policy:
 - Do not commit automatically after every edit.
 - Commit only when the user explicitly asks for a commit.
 - Before committing, re-check `git status` and make sure ignored files stay out of the commit.
-- If a remote is added later, record it in this file.
-- After the first commit, update this section with the latest commit hash and any configured GitHub remote.
+- If the remote changes later, record it in this file.
+- Keep this section aligned with the currently published repository state.
 
 ## Suggested Next Steps
 
-1. Push the initial repository state to GitHub.
-2. Optionally remove stale editor-history artifacts from the repo if a cleaner public template is desired.
-3. Start the next project by replacing the example `TemplateItems` flow with the real domain.
+1. Optionally remove stale editor-history artifacts from the repo if a cleaner public template is desired.
+2. Start the next project by replacing the example `TemplateItems` flow with the real domain.
+3. Add project-specific branding, auth, and deployment settings in the next derived repo.
