@@ -11,6 +11,7 @@
 - Add a new entry after each meaningful planning or implementation update.
 - Keep each entry concise but specific.
 - Include date, summary, files touched, decisions, and next action.
+- Before writing a timestamp, get the real current local time from the terminal. On Windows PowerShell, use `Get-Date -Format "yyyy-MM-dd HH:mm:ss K"` and record the local `YYYY-MM-DD HH:mm` value from that output.
 - Use newest entries at the bottom (append-only).
 
 ## Entry Template
