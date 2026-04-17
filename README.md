@@ -181,11 +181,13 @@ If enabled, the template can seed the example `TemplateItems` data for developme
 
 This template keeps three root AI support files for longer projects:
 
-- `AI_CarryOn.md`: short current-state handoff
-- `AI_ProgressTracking.md`: append-only work history
-- `AI_TemplateCreation.md`: template design and cleanup notes
+- `AI_CarryOn.md`: short current-state handoff for the project implementer
+- `AI_ProgressTracking.md`: append-only implementation history for the project implementer
+- `AI_TemplateCreation.md`: template-maintainer design and cleanup notes
 
-They are meant to help future AI agents continue work with better context.
+The first two are meant to be reused by the next project built from this template.
+
+`AI_TemplateCreation.md` is for template-maintainer tracking and stays separate from project-implementation history.
 
 ## Philosophy
 

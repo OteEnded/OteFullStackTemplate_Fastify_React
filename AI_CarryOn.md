@@ -1,52 +1,46 @@
 # AI_CarryOn.md
 
-> Purpose: short handoff for any AI agent continuing template work in this workspace.
+> Purpose: short handoff for the project being built from this template.
 > Last updated: 2026-04-17
 
 ## Current Goal
 
-This repository is now a reusable full-stack template and has been published to GitHub.
+Replace this section when you start a real project from this template.
 
-Current primary target:
+Suggested starting content:
 
-- `Backend/` and `Frontend/` are the reusable full-stack template pair.
-- Root AI tracking files stay neutral so future template work can continue cleanly.
-- Keep the repository publish-ready and easy to clone into the next project.
+- What is the current feature or milestone?
+- Which area is actively being changed right now?
+- What should the next AI agent continue without re-discovering?
 
 ## Current State
 
-### Full-stack template status
+Use this file for short, high-signal handoff notes only.
 
-- `Backend/` runs as a generic Fastify backend starter.
-- `Frontend/` runs as a generic React + Vite starter.
-- Frontend build outputs to `Backend/public/dist`.
-- Backend serves SPA assets and exposes example endpoints:
+Suggested content to keep here:
+
+- current goal
+- current branch / PR context if relevant
+- major files being edited
+- known blockers or risks
+- latest verification status
+
+Do not store long implementation history here. Put that in `AI_ProgressTracking.md`.
+
+## Template Baseline
+
+- `Backend/` is the Fastify backend starter.
+- `Frontend/` is the React + Vite frontend starter.
+- Frontend production builds output into `Backend/public/dist`.
+- Example endpoints included by default:
   - `/api/health`
   - `/api/template/meta`
   - `/api/template-items`
-- Database is optional by config and disabled by default in the live template config.
-
-### Example feature kept in template
-
-- A small `TemplateItems` model exists to show the full stack path:
-  - Sequelize model
-  - seed file
-  - Fastify CRUD-style route
-  - React example page
-- This sample is intended to be replaced by the next real project domain.
-
-### Backend conventions preserved from Fastify starter
-
-- plugin-based server bootstrap
-- config-driven logging
-- optional DB init
-- route split
-- static file serving
-- cron and websocket scaffolds
+- Database support is optional and disabled by default in the shipped local config.
 
 ## Key Files
 
-### Full-stack template
+Update this section to reflect the real project after you begin implementation.
 
 - `Backend/server.js`
 - `Backend/config.example.json`
@@ -59,35 +53,21 @@ Current primary target:
 
 ### Planning / AI context
 
-- `AI_TemplateCreation.md` = template cleanup decisions and direction
-- `AI_CarryOn.md` = short current-state handoff
-- `AI_ProgressTracking.md` = append-only work history
-
-## Known Remaining Cleanup
-
-- No active source cleanup blockers remain.
-- `.history/` folders contain editor snapshots and are not part of the template source.
-- Generated logs should not be treated as template content.
-
-## Verification State
-
-- Frontend build succeeded with `npm.cmd run build`.
-- Backend booted successfully with database disabled and served `public/dist` on port `3000`.
-- Workspace diagnostics were clean after the main refactor.
-- Final pre-publish recheck was completed on 2026-04-17.
+- `AI_CarryOn.md` = short current-state handoff for the implementing project
+- `AI_ProgressTracking.md` = append-only implementation history for the implementing project
+- `AI_TemplateCreation.md` = template-maintainer notes, not implementer history
 
 ## Git State
 
-- Git is initialized in the workspace root: `c:\data\FullStackTemplate_Fastify_React`
-- Current branch: `main`
-- Tracking remote: `origin`
-- Remote URL: `https://github.com/OteEnded/OteFullStackTemplate_Fastify_React.git`
-- Initial published baseline commit: `939953b` (`OteEnded[feat]: add initial fastify react fullstack template`)
+- Replace this section with the live git state of the derived project when work begins.
+- Template baseline remote:
+  - `origin`
+  - `https://github.com/OteEnded/OteFullStackTemplate_Fastify_React.git`
 
-State after the first publish:
+## Verification State
 
-- `main` is pushed to `origin/main`
-- The repository is ready to clone and use as a starting point
+- Replace this section with real verification notes for the derived project.
+- Template baseline was verified before publication on 2026-04-17.
 
 Notes:
 
@@ -116,11 +96,11 @@ Git workflow policy:
 - Do not commit automatically after every edit.
 - Commit only when the user explicitly asks for a commit.
 - Before committing, re-check `git status` and make sure ignored files stay out of the commit.
-- If the remote changes later, record it in this file.
-- Keep this section aligned with the currently published repository state.
+- If the remote changes later, record it in this file for the derived project.
+- Keep this file short and current.
 
 ## Suggested Next Steps
 
-1. Optionally remove stale editor-history artifacts from the repo if a cleaner public template is desired.
-2. Start the next project by replacing the example `TemplateItems` flow with the real domain.
-3. Add project-specific branding, auth, and deployment settings in the next derived repo.
+1. Replace the example `TemplateItems` flow with the real domain.
+2. Update this file with the actual current goal and implementation state.
+3. Start appending detailed work history in `AI_ProgressTracking.md`.
