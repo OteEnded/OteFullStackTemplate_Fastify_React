@@ -8,6 +8,7 @@ This template is designed to let you start quickly with a practical structure in
 
 - Backend: Fastify
 - Frontend: React + Vite
+- CSS tooling: Tailwind CSS configured via PostCSS, plus shipped custom stylesheet examples
 - Database: PostgreSQL + Sequelize
 - Runtime: Node.js
 - Optional extras: cron scaffold, websocket scaffold, config-driven logging
@@ -152,8 +153,10 @@ The frontend starter includes:
 
 - React Router setup
 - runtime config loading from `public/config.json`
+- Tailwind CSS tooling configured and ready to use
 - starter overview page
 - starter example CRUD-style page
+- shipped UI styling that is mostly implemented in `src/index.css`
 - build output configured for Fastify hosting
 
 ## Database Notes

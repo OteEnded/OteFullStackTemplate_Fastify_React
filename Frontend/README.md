@@ -6,8 +6,14 @@ Reusable React + Vite frontend for the full-stack template.
 
 - Loads runtime config from `public/config.json` with fallback to `public/config.example.json`.
 - Uses React Router for a small starter UI.
+- Includes Tailwind CSS in the frontend toolchain through PostCSS.
 - Talks to the Fastify backend example API.
 - Builds directly into `../Backend/public/dist` for Fastify to serve.
+
+Current styling note:
+
+- The shipped example UI is styled mostly through `src/index.css`.
+- Tailwind CSS is configured and available if you want to use utility classes in the next project.
 
 ## Run
 
