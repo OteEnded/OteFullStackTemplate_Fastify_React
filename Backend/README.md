@@ -36,6 +36,7 @@ Main sections:
 
 - `app.port`: Fastify port
 - `logging`: message, request, and Sequelize query logging
+	- Query log files are only initialized when `database.enabled` is `true`
 - `database.enabled`: turn DB integration on or off
 - `database.sync`: Sequelize sync behavior
 - `database.seed.force_template_items_sync`: force the example seed set
@@ -51,6 +52,7 @@ Main sections:
 ## Database Notes
 
 - When `database.enabled` is `false`, the server still runs and serves the frontend.
+- When `database.enabled` is `false`, query log files are not created.
 - DB-backed example routes return setup guidance until the database is enabled and configured.
 - The example model is `TemplateItems`, intended to be replaced by your real project models.
 

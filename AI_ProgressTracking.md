@@ -39,3 +39,10 @@ When a real project starts from this template, append entries here.
 - Files touched: `run.bat`, `README.md`, `AI_CarryOn.md`, `AI_ProgressTracking.md`
 - Decisions: `run.bat` calls `npm --prefix Backend start`; kept it minimal so it works on any Windows machine with Node installed.
 - Next action: Push the update to GitHub.
+
+### 2026-05-05 16:52
+
+- Summary: Fixed backend startup so query log files are only initialized when database support is enabled, and updated docs to match this behavior.
+- Files touched: `Backend/server.js`, `Backend/README.md`, `README.md`, `AI_ProgressTracking.md`
+- Decisions: Keep query log initialization inside the database-enabled startup branch to avoid creating unused `queries_*.log` files when DB is off.
+- Next action: Commit and push the logging behavior fix.

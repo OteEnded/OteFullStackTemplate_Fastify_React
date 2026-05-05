@@ -19,11 +19,6 @@ if (requestLogPath) {
   console.log(`Request log file created at: ${requestLogPath}`)
 }
 
-const queryLogPath = queryLogInit()
-if (queryLogPath) {
-  console.log(`Query log file created at: ${queryLogPath}`)
-}
-
 import dbPlugin from './app/plugins/db.js'
 import requestLoggerPlugin from './app/plugins/request-logger.js'
 import cronPlugin from './app/plugins/cron.js'
@@ -50,6 +45,11 @@ await log(`Request logger plugin registered`, import.meta.url)
 // Backward compatible: if `database.enabled` is not set, DB is considered enabled.
 const shouldUseDatabase = config.database?.enabled !== false
 if (shouldUseDatabase) {
+  const queryLogPath = queryLogInit()
+  if (queryLogPath) {
+    console.log(`Query log file created at: ${queryLogPath}`)
+  }
+
   await fastify.register(dbPlugin)
   await log(`Database plugin registered`, import.meta.url)
 } else {

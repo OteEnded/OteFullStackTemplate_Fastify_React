@@ -176,6 +176,8 @@ The frontend starter includes:
 
 Database is disabled by default in `Backend/config.json` and `Backend/config.example.json`.
 
+When database is disabled, the backend still runs and serves the frontend, and query log files are not created.
+
 To enable it:
 
 1. Set `database.enabled` to `true`
