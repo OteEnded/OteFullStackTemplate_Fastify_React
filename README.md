@@ -31,6 +31,7 @@ Frontend/
   package.json
   vite.config.ts
 
+run.bat
 AI_CarryOn.md
 AI_ProgressTracking.md
 AI_TemplateCreation.md
@@ -56,6 +57,18 @@ This template keeps one small generic example feature so the starter stays usefu
 The example feature is intended to be replaced with your real project domain.
 
 ## Quick Start
+
+### Quickest way — use `run.bat` (Windows)
+
+A `run.bat` file is included at the repository root. Double-click it or run it from any terminal to start the backend immediately:
+
+```bat
+run.bat
+```
+
+This runs `npm --prefix Backend start`, so it works from the root without changing directories. Build the frontend first with `npm run build` inside `Frontend/` so the backend has assets to serve.
+
+---
 
 PowerShell note:
 

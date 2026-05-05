@@ -32,6 +32,7 @@ Do not store long implementation history here. Put that in `AI_ProgressTracking.
 - `Backend/` is the Fastify backend starter.
 - `Frontend/` is the React + Vite frontend starter.
 - Frontend production builds output into `Backend/public/dist`.
+- `run.bat` at the repository root starts the backend via `npm --prefix Backend start` — double-click or run from any terminal.
 - Example endpoints included by default:
   - `/api/health`
   - `/api/template/meta`

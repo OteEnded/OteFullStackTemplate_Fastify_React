@@ -28,3 +28,14 @@
 No implementation entries yet.
 
 When a real project starts from this template, append entries here.
+
+---
+
+## Template Updates
+
+### 2026-05-05 15:16
+
+- Summary: Added `run.bat` at the repository root so users can start the backend from the root directory without changing directories.
+- Files touched: `run.bat`, `README.md`, `AI_CarryOn.md`, `AI_ProgressTracking.md`
+- Decisions: `run.bat` calls `npm --prefix Backend start`; kept it minimal so it works on any Windows machine with Node installed.
+- Next action: Push the update to GitHub.
