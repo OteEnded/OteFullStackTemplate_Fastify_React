@@ -81,6 +81,11 @@ export const apiUrl = (path: string): string => {
     throw new Error(`apiUrl path must start with '/': ${path}`);
   }
 
-  const baseUrl = getAppConfig().api.base_url;
-  return baseUrl ? `${baseUrl}${path}` : path;
+  const configuredBaseUrl = getAppConfig().api.base_url;
+  
+  // If config has an explicit base_url, use it (for cross-origin scenarios)
+  // Otherwise, use the current origin (same domain where frontend was served)
+  const baseUrl = configuredBaseUrl || window.location.origin;
+  
+  return `${baseUrl}${path}`;
 };

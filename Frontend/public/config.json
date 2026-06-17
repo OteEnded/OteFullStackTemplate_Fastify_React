@@ -5,5 +5,8 @@
   },
   "api": {
     "base_url": ""
+  },
+  "_comments": {
+    "api.base_url": "Leave empty to use the current origin (recommended when backend serves frontend). Set explicitly only for cross-origin API calls."
   }
 }

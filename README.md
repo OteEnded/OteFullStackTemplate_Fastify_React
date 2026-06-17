@@ -166,11 +166,15 @@ The frontend starter includes:
 
 - React Router setup
 - runtime config loading from `public/config.json`
+- automatic API base URL detection (uses the current origin by default)
 - Tailwind CSS tooling configured and ready to use
 - starter overview page
 - starter example CRUD-style page
 - shipped UI styling that is mostly implemented in `src/index.css`
 - build output configured for Fastify hosting
+
+**API base URL:**
+By default, the frontend uses the same origin it was served from for API calls. This means if your backend serves the frontend at `https://example.com`, API calls go to `https://example.com/api/...` automatically. You only need to configure `api.base_url` if the API is hosted on a different domain.
 
 ## Database Notes
 
