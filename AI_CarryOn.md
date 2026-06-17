@@ -1,7 +1,7 @@
 # AI_CarryOn.md
 
 > Purpose: short handoff for the project being built from this template.
-> Last updated: 2026-04-17
+> Last updated: 2026-06-17
 
 ## Current Goal
 
@@ -33,11 +33,13 @@ Do not store long implementation history here. Put that in `AI_ProgressTracking.
 - `Frontend/` is the React + Vite frontend starter.
 - Frontend production builds output into `Backend/public/dist`.
 - `run.bat` at the repository root starts the backend via `npm --prefix Backend start` — double-click or run from any terminal.
+- Frontend automatically uses the current origin for API calls (no manual base URL config needed when backend serves frontend).
 - Example endpoints included by default:
   - `/api/health`
   - `/api/template/meta`
   - `/api/template-items`
 - Database support is optional and disabled by default in the shipped local config.
+- Query log files are only created when database is enabled.
 
 ## Key Files
 
@@ -49,6 +51,7 @@ Update this section to reflect the real project after you begin implementation.
 - `Backend/database/models/template_item.model.js`
 - `Backend/database/seeds/seed_template_items.js`
 - `Frontend/src/App.tsx`
+- `Frontend/src/config.ts` — API base URL auto-detection logic
 - `Frontend/src/pages/HomePage.tsx`
 - `Frontend/src/pages/ExampleItemsPage.tsx`
 
