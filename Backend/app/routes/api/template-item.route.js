@@ -65,14 +65,14 @@ export default async function templateItemRoutes(fastify) {
     return reply.code(201).send({ ok: true, data: row })
   })
 
-  fastify.patch('/:id', async (request, reply) => {
+  fastify.patch('/:uuid', async (request, reply) => {
     const TemplateItems = ensureTemplateItemsModel(fastify, reply)
     if (!TemplateItems) {
       return
     }
 
-    const itemId = Number(request.params?.id)
-    if (!Number.isInteger(itemId) || itemId <= 0) {
+    const itemId = String(request.params?.uuid || '').trim()
+    if (!itemId) {
       return reply.code(400).send({ ok: false, message: 'invalid item id' })
     }
 

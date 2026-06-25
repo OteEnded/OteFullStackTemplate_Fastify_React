@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { apiUrl } from '../config';
 
 type TemplateItem = {
-  id: number;
+  uuid: string;
+  rolling_id: number;
   name: string;
   summary: string;
   status: 'draft' | 'active' | 'archived';
@@ -20,14 +21,14 @@ const EMPTY_FORM = {
 
 export default function ExampleItemsPage() {
   const [items, setItems] = useState<TemplateItem[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedUuid, setSelectedUuid] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  const selectedItem = items.find((item) => item.id === selectedId) || null;
+  const selectedItem = items.find((item) => item.uuid === selectedUuid) || null;
 
   const loadItems = async () => {
     setLoading(true);
@@ -44,8 +45,8 @@ export default function ExampleItemsPage() {
       const rows: TemplateItem[] = result.data || [];
       setItems(rows);
 
-      if (rows.length > 0 && !selectedId) {
-        setSelectedId(rows[0].id);
+      if (rows.length > 0 && !selectedUuid) {
+        setSelectedUuid(rows[0].uuid);
         setForm({
           name: rows[0].name,
           summary: rows[0].summary,
@@ -76,7 +77,7 @@ export default function ExampleItemsPage() {
       status: selectedItem.status,
       priority: selectedItem.priority,
     });
-  }, [selectedItem?.id]);
+  }, [selectedItem?.uuid]);
 
   const saveNewItem = async () => {
     if (!form.name.trim()) {
@@ -103,7 +104,7 @@ export default function ExampleItemsPage() {
       const created: TemplateItem = result.data;
       const nextItems = [created, ...items];
       setItems(nextItems);
-      setSelectedId(created.id);
+      setSelectedUuid(created.uuid);
       setMessage('Created a new example item. Replace this flow with your own domain create action.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unexpected error');
@@ -113,7 +114,7 @@ export default function ExampleItemsPage() {
   };
 
   const updateItem = async () => {
-    if (!selectedId) {
+    if (!selectedUuid) {
       setError('Choose an item before saving changes.');
       return;
     }
@@ -123,7 +124,7 @@ export default function ExampleItemsPage() {
     setMessage('');
 
     try {
-      const response = await fetch(apiUrl(`/api/template-items/${selectedId}`), {
+      const response = await fetch(apiUrl(`/api/template-items/${selectedUuid}`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -135,7 +136,7 @@ export default function ExampleItemsPage() {
       }
 
       const updated: TemplateItem = result.data;
-      setItems((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setItems((current) => current.map((item) => item.uuid === updated.uuid ? updated : item));
       setMessage('Updated the selected example item.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unexpected error');
@@ -173,13 +174,14 @@ export default function ExampleItemsPage() {
           <div className="item-list">
             {items.map((item) => (
               <button
-                key={item.id}
-                className={item.id === selectedId ? 'item-card active' : 'item-card'}
-                onClick={() => setSelectedId(item.id)}
+                key={item.uuid}
+                className={item.uuid === selectedUuid ? 'item-card active' : 'item-card'}
+                onClick={() => setSelectedUuid(item.uuid)}
               >
                 <strong>{item.name}</strong>
                 <span>{item.summary || 'No summary yet.'}</span>
                 <div className="pill-row compact">
+                  <span className="pill">#{item.rolling_id}</span>
                   <span className="pill">{item.status}</span>
                   <span className="pill">{item.priority}</span>
                 </div>
@@ -190,7 +192,7 @@ export default function ExampleItemsPage() {
 
         <article className="panel">
           <p className="eyebrow">Editor</p>
-          <h3>{selectedId ? `Edit item #${selectedId}` : 'Create an item'}</h3>
+          <h3>{selectedItem ? `Edit item #${selectedItem.rolling_id}` : 'Create an item'}</h3>
 
           <label className="field">
             <span>Name</span>
@@ -241,7 +243,7 @@ export default function ExampleItemsPage() {
             <button className="primary-btn" onClick={() => void saveNewItem()} disabled={saving}>
               {saving ? 'Saving...' : 'Create new item'}
             </button>
-            <button className="secondary-btn" onClick={() => void updateItem()} disabled={saving || !selectedId}>
+            <button className="secondary-btn" onClick={() => void updateItem()} disabled={saving || !selectedUuid}>
               {saving ? 'Saving...' : 'Update selected item'}
             </button>
           </div>

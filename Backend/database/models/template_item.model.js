@@ -2,11 +2,19 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
     return sequelize.define(
         "TemplateItems",
         {
-            id: {
-                type: DataTypes.INTEGER,
+            uuid: {
+                type: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
+                allowNull: false,
+                comment: "Primary key of the table",
+            },
+            rolling_id: {
+                type: DataTypes.INTEGER,
                 autoIncrement: true,
                 allowNull: false,
+                unique: true,
+                comment: "Auto-incrementing secondary key (a good index; not the primary key)",
             },
             name: {
                 type: DataTypes.STRING,
