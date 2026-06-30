@@ -65,7 +65,8 @@ export default async function templateItemRoutes(fastify) {
     return reply.code(201).send({ ok: true, data: row })
   })
 
-  fastify.patch('/:uuid', async (request, reply) => {
+  // Update via POST (this template's REST surface is GET + POST only).
+  fastify.post('/:uuid', async (request, reply) => {
     const TemplateItems = ensureTemplateItemsModel(fastify, reply)
     if (!TemplateItems) {
       return

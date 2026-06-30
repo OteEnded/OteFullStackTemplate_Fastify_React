@@ -125,7 +125,7 @@ export default function ExampleItemsPage() {
 
     try {
       const response = await fetch(apiUrl(`/api/template-items/${selectedUuid}`), {
-        method: 'PATCH',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });

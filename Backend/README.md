@@ -46,8 +46,8 @@ Main sections:
 - `GET /api/health`
 - `GET /api/template/meta`
 - `GET /api/template-items`
-- `POST /api/template-items`
-- `PATCH /api/template-items/:id`
+- `POST /api/template-items` (create)
+- `POST /api/template-items/:uuid` (update — REST surface is GET + POST only)
 
 ## Database Notes
 

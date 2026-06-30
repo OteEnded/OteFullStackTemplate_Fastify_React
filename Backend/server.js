@@ -35,7 +35,7 @@ await log(`Initializing server in ${env} environment`, import.meta.url)
 
 await fastify.register(fastifyCors, {
   origin: true,
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS']
+  methods: ['GET', 'POST', 'OPTIONS']
 })
 await log(`CORS plugin registered`, import.meta.url)
 
