@@ -3,6 +3,9 @@
 
 AI_TemplateCreation.md
 
+# Lockfiles — each project generates its own via `npm install`
+package-lock.json
+
 Backend/public/dist/
 
 *.log
