@@ -60,13 +60,16 @@ The example feature is intended to be replaced with your real project domain.
 
 ### Quickest way — use `run.bat` (Windows)
 
-A `run.bat` file is included at the repository root. Double-click it or run it from any terminal to start the backend immediately:
+A `run.bat` file is included at the repository root. Double-click it or run it from any terminal:
 
 ```bat
 run.bat
 ```
 
-This runs `npm --prefix Backend start`, so it works from the root without changing directories. Build the frontend first with `npm run build` inside `Frontend/` so the backend has assets to serve.
+On first run it installs backend and frontend dependencies (if `node_modules` is
+missing), builds the frontend into `Backend/public/dist`, then starts the Fastify
+backend — which serves both the API and the built frontend at
+`http://localhost:3000`. No manual `npm install` or build step needed.
 
 ---
 
