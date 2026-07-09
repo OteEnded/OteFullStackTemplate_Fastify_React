@@ -31,7 +31,9 @@ Frontend/
   package.json
   vite.config.ts
 
-run.bat
+wizard.bat / wizard.sh   run once after cloning — creates your root run script
+scripts/             launchers/ (run-script templates), server_*, pull_*, pull_run_*
+scripts/lib/         helper units (install_*, build_*) used by the above
 AI_CarryOn.md
 AI_ProgressTracking.md
 AI_TemplateCreation.md
@@ -58,18 +60,33 @@ The example feature is intended to be replaced with your real project domain.
 
 ## Quick Start
 
-### Quickest way — use `run.bat` (Windows)
+### Quickest way — run the wizard, then your run script
 
-A `run.bat` file is included at the repository root. Double-click it or run it from any terminal:
+Double-click (or run from any terminal) the wizard once, pick your OS, then run
+the script it creates:
 
 ```bat
-run.bat
+wizard.bat             REM pick Windows/Linux/Both  (Linux/macOS: bash wizard.sh)
+run_windows.bat        REM the wizard created this   (Linux/macOS: bash run_linux.sh)
 ```
 
-On first run it installs backend and frontend dependencies (if `node_modules` is
-missing), builds the frontend into `Backend/public/dist`, then starts the Fastify
-backend — which serves both the API and the built frontend at
-`http://localhost:3000`. No manual `npm install` or build step needed.
+The wizard copies a launcher from `scripts/launchers/` to the repo root, so you
+end up with a single run file for your OS. On first run that script installs
+backend + frontend dependencies (if `node_modules` is missing), builds the
+frontend into `Backend/public/dist`, then starts the Fastify backend — which
+serves both the API and the built frontend at `http://localhost:3000`.
+
+**Hosting on a server (production)** — scripts live in `scripts/`:
+
+```bat
+scripts\server_windows.bat     REM install, build, run with NODE_ENV=production
+scripts\pull_windows.bat       REM git pull only
+scripts\pull_run_windows.bat   REM git pull, then build + run
+```
+
+Linux/macOS equivalents are the matching `*_linux.sh` files. For a long-running
+service, run the backend under a process manager (pm2, or nssm/Task Scheduler on
+Windows; systemd on Linux).
 
 ---
 

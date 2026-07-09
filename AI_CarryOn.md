@@ -32,7 +32,13 @@ Do not store long implementation history here. Put that in `AI_ProgressTracking.
 - `Backend/` is the Fastify backend starter.
 - `Frontend/` is the React + Vite frontend starter.
 - Frontend production builds output into `Backend/public/dist`.
-- `run.bat` at the repository root starts the backend via `npm --prefix Backend start` — double-click or run from any terminal.
+- Run scripts (OS-named, wizard-driven): root ships `wizard.bat` / `wizard.sh` —
+  run once, pick Windows/Linux/Both, and it creates the root `run_windows.bat` /
+  `run_linux.sh` (dev: install + build frontend + backend watch) from
+  `scripts/launchers/`. `scripts/` also has `server_*` (build + run with
+  NODE_ENV=production for hosting) and `pull_*` / `pull_run_*`; helpers in
+  `scripts/lib/`. Generated root run scripts are gitignored. Fastify serves API +
+  built frontend on one origin.
 - Frontend automatically uses the current origin for API calls (no manual base URL config needed when backend serves frontend).
 - Example endpoints included by default:
   - `/api/health`
