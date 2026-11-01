@@ -16,7 +16,7 @@ npm run lint
 | Path | What |
 |---|---|
 | `/` | Public page (`PublicLayout` + `pages/LandingPage`) |
-| `/login` | Sign-in card (`AuthLayout`) — **stub** until the auth module (Slice 8) |
+| `/login` | Sign-in card (`AuthLayout`): password and/or Login with Oteracount — whatever the server enabled; a note when auth is off |
 | `/console` | Dashboard: server health + the demo widget |
 | `/console/items` | DEMO — template items list, form dialog, archive confirm, toasts |
 | `/console/settings` | Appearance (theme) + About (from `/api/health`) |
@@ -37,7 +37,7 @@ src/
   components/shell/       ConsoleLayout (grouped nav, drawer < 900px), AuthLayout, PublicLayout
   components/icons/       custom SVG icons when lucide-react lacks one
   lib/                    theme, api helpers (useLoad), toast, overlay (drag-safe dismiss), lazyWithReload
-  auth/                   AuthProvider (STUB) + useAuth() — the one seam Slice 8 replaces
+  auth/                   AuthProvider (GET /api/auth/me, login/logout), useAuth(), RequireSignIn (console gate)
   features/template-items DEMO feature — delete the folder (the wizard does it)
   nav.ts                  the console's side nav (groups, icons, optional permission per item)
   api.ts                  getJson / postJson — GET + POST only, { ok, data } / { ok:false, message, code }

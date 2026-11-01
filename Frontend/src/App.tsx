@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
+import { RequireSignIn } from './auth/RequireSignIn'
 import { ConsoleLayout } from './components/shell/ConsoleLayout'
 import { PublicLayout } from './components/shell/PublicLayout'
 import { Toaster } from './components/ui/Toaster'
@@ -10,7 +11,8 @@ import NotFoundPage from './pages/NotFoundPage'
 
 // Routes:
 //   /            public page (PublicLayout)          /login   sign-in card (AuthLayout)
-//   /console/*   the console (ConsoleLayout) — open without signing in until Slice 8's auth
+//   /console/*   the console (ConsoleLayout) — needs sign-in when the server's auth module is on
+//                (RequireSignIn); open when auth.enabled is false
 // Console pages are code-split; lazyWithReload recovers from stale chunks after a redeploy.
 
 const DashboardPage = lazyWithReload(() => import('./pages/DashboardPage'))
@@ -28,7 +30,14 @@ export default function App() {
             <Route index element={<LandingPage />} />
           </Route>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/console" element={<ConsoleLayout />}>
+          <Route
+            path="/console"
+            element={
+              <RequireSignIn>
+                <ConsoleLayout />
+              </RequireSignIn>
+            }
+          >
             <Route index element={<DashboardPage />} />
             <Route path="items" element={<ItemsPage />} /> {/* @demo */}
             <Route path="settings" element={<SettingsPage />} />

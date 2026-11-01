@@ -30,7 +30,7 @@ const PREPAINT = { dark: "rgb(23, 19, 16)", light: "rgb(243, 239, 231)" }; // in
 
 const PAGES = [
     { name: "landing", path: "/", ready: "h1" },
-    { name: "login", path: "/login", ready: "form" },
+    { name: "login", path: "/login", ready: "h1:has-text('Sign in')" },
     { name: "dashboard", path: "/console", ready: "h1:has-text('Dashboard')" },
     ...(HAS_DEMO ? [{ name: "items-dboff", path: "/console/items", ready: "h1:has-text('Template items')" }] : []),
     { name: "settings", path: "/console/settings", ready: "h1:has-text('Settings')" },
@@ -195,17 +195,13 @@ try {
         check("settings → About: version + database from /api/health", /Version/.test(about) && /Off/.test(about), about.replace(/\s+/g, " ").slice(0, 120));
         check("settings → About: tab is in the URL", page.url().includes("tab=about"));
 
-        // login stub
+        // login with the auth module OFF (this drive's config): no form that can't work — a note and
+        // the way into the open console. The form itself is driven in ui/auth-ui.mjs (auth ON).
         await page.goto(`${base}/login`);
-        await page.click("button[type=submit]");
-        check("login: empty submit shows field errors", (await page.locator(".field-error").count()) === 2);
-        await page.fill("input[autocomplete=username]", "root");
-        await page.fill("input[autocomplete=current-password]", "secret");
-        await page.click("button[type=submit]");
         await page.waitForSelector(".callout");
-        check("login: stub explains sign-in isn't enabled yet (Slice 8)", /isn't enabled yet/.test(await page.locator(".callout").innerText()));
-        await page.click("button.pw-peek");
-        check("login: password peek shows the text", (await page.getAttribute("input[autocomplete=current-password]", "type")) === "text");
+        check("login (auth off): explains sign-in is off on this server", /Sign-in is off/.test(await page.locator(".callout").innerText()));
+        check("login (auth off): no password form", (await page.locator("form").count()) === 0);
+        check("login (auth off): links on to the console", await page.getByRole("link", { name: /Continue to the console/ }).isVisible());
 
         if (HAS_DEMO) {
             await page.goto(`${base}/console/items`);
