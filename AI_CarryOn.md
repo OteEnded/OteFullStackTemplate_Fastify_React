@@ -1,116 +1,69 @@
 # AI_CarryOn.md
 
-> Purpose: short handoff for the project being built from this template.
-> Last updated: 2026-06-17
+> Current-state handoff for THIS project — rewritten in place, always true *now*. History goes in
+> `AI_ProgressTracking.md`. How we work (docs, git, config, DB, tests, protocol): **`AI_Standards.md`** — read it.
+> Last updated: <YYYY-MM-DD HH:mm — from `Get-Date -Format "yyyy-MM-dd HH:mm:ss K"`>
 
-## Current Goal
+## ▶▶ START HERE
 
-Replace this section when you start a real project from this template.
+⚠️ **This is still the template's text.** When the project starts: replace this section with the real
+goal, run the wizard, write the project's port here, and append entry #1 to `AI_ProgressTracking.md`.
 
-Suggested starting content:
+- **What this is:** a project built from `OteFullStackTemplate_Fastify_React` v2 — Fastify 5 (JS ESM) serves
+  the API **and** the built React app on one origin.
+- **Set up:** `wizard.bat` (Windows) / `bash wizard.sh` — name, port, database, auth, realtime, demo, launchers,
+  install, migrate. It prints the OteServerManager registration.
+- **Run (dev):** root `run_windows.bat` / `./run_linux.sh` → http://127.0.0.1:<app.port>. **No watch mode:**
+  after changing code, stop it (Ctrl+C) and run it again.
+- **Test:** `cd test && npm run test-all` (one command, real exit code; test instance on app.port + 1).
+- **Host:** root `server_windows.bat` / `./server_linux.sh` (OteServerManager); update with `scripts/deploy_*`.
+- **Port:** `<app.port>` — fill in (the template default 8080 is reserved for the template itself).
 
-- What is the current feature or milestone?
-- Which area is actively being changed right now?
-- What should the next AI agent continue without re-discovering?
+## What exists — and what only looks like it exists
 
-## Current State
+✅ **Built and tested (template baseline)**
+- API contract `{ ok:true, data }` / `{ ok:false, message, code }` — one error handler (`app/plugins/error-handler.js`).
+- **GET + POST only** — the server refuses to boot if a route registers PATCH/PUT/DELETE (`app/plugins/guards.js`).
+- Loopback by default (`app.host`), same-origin by default (CORS off unless `app.public_origins`), cross-site
+  POSTs refused, startup config check that lists every problem, graceful shutdown, health with DB ping.
+- Request logs never store cookies / auth headers / query values / bodies (opt-in, always redacted).
+- Database (optional): none · Postgres (SQL migrations own the schema, `npm run db:migrate`, boot guard) ·
+  SQLite / MySQL / MariaDB / MSSQL in `sync` mode. Seeds: `npm run db:seed`. Log retention.
+- Optional modules (off until enabled in `Backend/config.json`): **auth** (config root, local users,
+  Login with Oteracount) and **realtime** (SSE + WebSocket from one hub).
+- `test/`: unit (in-process) + live checks; DB checks need `test/test.config.json`.
+- Frontend: React + Vite + Tailwind 4, warm token theme (light/dark/system), console at `/console`.
 
-Use this file for short, high-signal handoff notes only.
+❌ **Not built — don't assume**
+- No file uploads helper. No i18n framework. No admin UI for local users (use `npm run auth:user`).
+- Non-Postgres dialects have no SQL migrations (sync mode only).
+- The demo feature (`template items`) is an EXAMPLE — replace or remove it (the wizard can).
 
-Suggested content to keep here:
+## Decisions (all reversible — flagged, not buried)
+- <project decisions go here, with Ote's words quoted and dated>
 
-- current goal
-- current branch / PR context if relevant
-- major files being edited
-- known blockers or risks
-- latest verification status
+## Ownership
+- Long-running services Ote runs (this app in production, Postgres, Oteracount, OteServerManager) are **his** —
+  never start or stop them. Test against your own instance on the test port (announced; stop it after).
 
-Do not store long implementation history here. Put that in `AI_ProgressTracking.md`.
+## ⚠️ Traps — do not re-derive
+- **Never edit an applied migration** — `db:migrate` and the server refuse it. Add a new numbered file.
+- **Don't name a schema in migration SQL** — the runner sets `search_path`.
+- **Table names:** `mst_` / `txn_` / `log_` prefix, ONE name end to end (file = define() = tableName = `db.` accessor).
+- **The auth session cookie name is per app** (`<app.slug>_session`) — two apps on one host sharing one log
+  each other out.
+- **Removing the demo later** (after the first migrate): drop its table in a NEW migration; don't delete 002.
+- **VS Code "Cannot find type definition file for 'vite/client'"** = `Frontend/node_modules` isn't installed.
 
-## Template Baseline
+## 🚦 Open — needs <owner>
+- <parked items, each with who owns the decision>
 
-- `Backend/` is the Fastify backend starter.
-- `Frontend/` is the React + Vite frontend starter.
-- Frontend production builds output into `Backend/public/dist`.
-- Run scripts (OS-named, wizard-driven): root ships `wizard.bat` / `wizard.sh` —
-  run once, pick Windows/Linux/Both, and it creates the root `run_windows.bat` /
-  `run_linux.sh` (dev: install + build frontend + backend watch) from
-  `scripts/launchers/`. `scripts/` also has `server_*` (build + run with
-  NODE_ENV=production for hosting) and `pull_*` / `pull_run_*`; helpers in
-  `scripts/lib/`. Generated root run scripts are gitignored. Fastify serves API +
-  built frontend on one origin.
-- Frontend automatically uses the current origin for API calls (no manual base URL config needed when backend serves frontend).
-- Example endpoints included by default:
-  - `/api/health`
-  - `/api/template/meta`
-  - `/api/template-items`
-- Database support is optional and disabled by default in the shipped local config.
-- Query log files are only created when database is enabled.
+## Next, in order
+1. <the next action>
 
-## Key Files
-
-Update this section to reflect the real project after you begin implementation.
-
-- `Backend/server.js`
-- `Backend/config.example.json`
-- `Backend/app/routes/api/template-item.route.js`
-- `Backend/database/models/template_item.model.js`
-- `Backend/database/seeds/seed_template_items.js`
-- `Frontend/src/App.tsx`
-- `Frontend/src/config.ts` — API base URL auto-detection logic
-- `Frontend/src/pages/HomePage.tsx`
-- `Frontend/src/pages/ExampleItemsPage.tsx`
-
-### Planning / AI context
-
-- `AI_CarryOn.md` = short current-state handoff for the implementing project
-- `AI_ProgressTracking.md` = append-only implementation history for the implementing project
-- `AI_TemplateCreation.md` = template-maintainer notes, not implementer history
-
-## Git State
-
-- Replace this section with the live git state of the derived project when work begins.
-- Template baseline remote:
-  - `origin`
-  - `https://github.com/OteEnded/OteFullStackTemplate_Fastify_React.git`
-
-## Verification State
-
-- Replace this section with real verification notes for the derived project.
-- Template baseline was verified before publication on 2026-04-17.
-
-Notes:
-
-- `AI_TemplateCreation.md` is intentionally ignored by git.
-- `Backend/config.json` is ignored through `Backend/.gitignore`.
-- Frontend build output under `Backend/public/dist/` is ignored at the root level.
-
-## Commit Message Policy
-
-Use a consistent commit format:
-
-- `OteEnded[feat]: ...`
-- `OteEnded[fix]: ...`
-- `OteEnded[refactor]: ...`
-- `OteEnded[docs]: ...`
-- `OteEnded[chore]: ...`
-
-Examples:
-
-- `OteEnded[feat]: add initial fullstack template structure`
-- `OteEnded[refactor]: replace checklist flow with generic template items`
-- `OteEnded[docs]: add root template README`
-
-Git workflow policy:
-
-- Do not commit automatically after every edit.
-- Commit only when the user explicitly asks for a commit.
-- Before committing, re-check `git status` and make sure ignored files stay out of the commit.
-- If the remote changes later, record it in this file for the derived project.
-- Keep this file short and current.
-
-## Suggested Next Steps
-
-1. Replace the example `TemplateItems` flow with the real domain.
-2. Update this file with the actual current goal and implementation state.
-3. Start appending detailed work history in `AI_ProgressTracking.md`.
+## Standing rules (always true for this project)
+- JSON config (`Backend/config.json`, gitignored; `config.example.json` tracked) — never `.env`.
+- GET + POST only. Envelope `{ ok, data }` / `{ ok:false, message, code }`.
+- UUID primary key + `rolling_id` + `created_at`/`updated_at` on every table.
+- Commits: `OteEnded[type]: <outcome sentence>`, no AI attribution, only when Ote asks. Never track
+  `package-lock.json`.
