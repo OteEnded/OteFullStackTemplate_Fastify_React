@@ -1,6 +1,12 @@
 {
     "app": {
-        "port": 8080
+        "name": "FullStack Template",
+        "slug": "fullstack-template",
+        "host": "127.0.0.1",
+        "port": 8080,
+        "public_origins": [],
+        "trust_proxy": false,
+        "body_limit_mb": 1
     },
     "logging": {
         "message": {
@@ -53,5 +59,16 @@
             "port": 5432,
             "dialect": "postgres"
         }
+    },
+    "_comments": {
+        "app.name": "Human-readable name — shown by /api/health and in the UI.",
+        "app.slug": "Short machine id (lowercase, dashes). Used for things that must be unique per app on one host, e.g. the session cookie name.",
+        "app.host": "127.0.0.1 = this machine only (safe default). 0.0.0.0 = every network interface (LAN, VPN) — set it on purpose.",
+        "app.port": "8080 is Ote's reserved template default (rule XX YY Z, zone 08 id 08). Give a real project its own port; the test instance uses port + 1.",
+        "app.public_origins": "Extra sites allowed to call this API from a browser, e.g. [\"https://app.example.com\"]. Same-origin needs nothing. Never \"*\".",
+        "app.trust_proxy": "false, or the reverse proxy's address / hop count (e.g. \"127.0.0.1\" or 1) so request.ip is the real visitor. Never true.",
+        "app.body_limit_mb": "Largest accepted request body in megabytes (Fastify default is 1).",
+        "logging.request": "log_headers / log_query / log_body add request content to the request log — off by default; secrets are redacted even when on.",
+        "database.enabled": "false = no database: the app still runs; DB-backed routes answer 503 db_disabled."
     }
 }

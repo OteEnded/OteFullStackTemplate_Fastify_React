@@ -7,12 +7,34 @@ export default async function (fastify) {
   // })
 
 
-  fastify.get('/health', async () => {
-    return {
-      ok: true,
-      service: 'FullStack Template API',
-      timestamp: new Date().toISOString()
+  // Health in the normal envelope (a special shape forced a special-case client in
+  // VOOTED). Names the service, so a check can tell THIS app from an old instance
+  // or another app squatting the port. With the DB on, it pings it: db down → 503.
+  fastify.get('/health', async (request, reply) => {
+    const { name, version, startedAt } = fastify.appInfo
+    let db = 'off'
+    if (fastify.db?.sequelize) {
+      try {
+        await Promise.race([
+          fastify.db.sequelize.authenticate(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000)),
+        ])
+        db = 'up'
+      } catch {
+        db = 'down'
+      }
     }
+    const data = {
+      service: name,
+      version,
+      uptime_s: Math.round((Date.now() - startedAt.getTime()) / 1000),
+      db,
+      time: new Date().toISOString(),
+    }
+    if (db === 'down') {
+      return reply.code(503).send({ ok: false, message: 'Database is unreachable', code: 'db_down', data })
+    }
+    return { ok: true, data }
   })
 
   fastify.get('/template/meta', async () => {

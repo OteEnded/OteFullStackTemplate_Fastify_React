@@ -8,17 +8,16 @@ export default fp(async function (fastify, opts) {
     //     // your task here
     // }, { isLog: true })
 
-    // // start when server ready
-    // fastify.addHook('onReady', async () => {
-    //     cronManager.startAll()
-    //     fastify.log.info('Cron jobs started')
-    // })
+    // Lifecycle hooks are ON (no-ops while there are no jobs): jobs start once the
+    // server is ready and stop on shutdown — server.js closes Fastify on
+    // Ctrl+C / SIGTERM / console close, so onClose really runs now.
+    fastify.addHook('onReady', async () => {
+        cronManager.startAll()
+    })
 
-    // // stop when server shutdown
-    // fastify.addHook('onClose', async () => {
-    //     cronManager.stopAll()
-    //     fastify.log.info('Cron jobs stopped')
-    // })
+    fastify.addHook('onClose', async () => {
+        cronManager.stopAll()
+    })
 
     // Decorate fastify with cronManager for easy access
     fastify.decorate('cronManager', cronManager)

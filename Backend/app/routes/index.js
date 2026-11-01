@@ -22,6 +22,9 @@ export default async function routes(fastify) {
             return reply.code(404).type('text/plain; charset=utf-8').send('Not found');
         }
 
+        if (typeof reply.sendFile !== 'function') {
+            return reply.code(404).type('text/plain; charset=utf-8').send('Frontend not built — run the frontend build');
+        }
         return reply.type('text/html; charset=utf-8').sendFile('index.html');
     });
 }

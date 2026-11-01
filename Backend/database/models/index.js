@@ -3,12 +3,16 @@ import logMessageModel from "./log_message.model.js";
 import logRequestModel from "./log_request.model.js";
 import templateItemModel from "./template_item.model.js";
 
+// Allowed values for constrained columns. ONE list, used by the model validators
+// AND the route JSON schemas (app/routes/api/*.route.js), so they can't drift.
+export const CHOICES = {
+    log_messages_level: ["info", "warning", "error"],
+    template_item_status: ["draft", "active", "archived"],
+    template_item_priority: ["low", "medium", "high"],
+};
+
 export default function initModels(sequelize, schema) {
-    const choices = {
-        log_messages_level: ["info", "warning", "error"],
-        template_item_status: ["draft", "active", "archived"],
-        template_item_priority: ["low", "medium", "high"],
-    };
+    const choices = CHOICES;
 
     // Sequelize lifecycle hooks, keyed by the hook name each model looks up
     // (e.g. template_item.model.js uses `hooks?.templateItem`). Add one entry

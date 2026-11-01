@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import cron from "node-cron";
 
 let cachedConfig = null;
+let loadedConfigPath = null;
 let logFilePath = null;
 let requestLogFilePath = null;
 let queryLogFilePath = null;
@@ -83,16 +84,21 @@ function resolveConfigPath() {
     return path.resolve(__dirname, "../config.json");
 }
 
-export function loadConfig() {
+// The FIRST call decides which file is the config for this process (server.js
+// passes `--config <file>` here, e.g. for a test instance); every later call —
+// from logging, the DB layer, plugins — gets that same cached object.
+export function loadConfig(explicitPath) {
     if (cachedConfig) {
         return cachedConfig;
     }
 
-    const configPath = resolveConfigPath();
+    const configPath = explicitPath ? path.resolve(explicitPath) : resolveConfigPath();
 
     if (!fs.existsSync(configPath)) {
         throw new Error(
-            "config.json not found. Copy config.example.json to config.json",
+            explicitPath
+                ? `Config file not found: ${configPath}`
+                : "config.json not found. Copy config.example.json to config.json",
         );
     }
 
@@ -102,11 +108,16 @@ export function loadConfig() {
 
     try {
         cachedConfig = JSON.parse(raw);
+        loadedConfigPath = configPath;
     } catch (err) {
-        throw new Error("Invalid JSON format in config.json");
+        throw new Error(`Invalid JSON format in ${path.basename(configPath)}: ${err.message}`);
     }
 
     return cachedConfig;
+}
+
+export function getConfigPath() {
+    return loadedConfigPath;
 }
 
 // Logging functions
