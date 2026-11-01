@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import ISO6391 from "iso-639-1";
 import cron from "node-cron";
 
 let cachedConfig = null;
@@ -481,53 +480,3 @@ class CronManager {
 }
 
 export const cronManager = new CronManager();
-
-export function emojiToSvgFilename(emoji) {
-    const codepoints = Array.from(emoji)
-        .map(char => char.codePointAt(0))
-        .filter(cp =>
-            cp !== undefined &&
-            cp !== 0xfe0f // remove variation selector-16
-        )
-        .map(cp => cp.toString(16).toLowerCase());
-
-    return `${codepoints.join("-")}.svg`;
-}
-
-export async function resolveEmojiSvg(emoji) {
-    if (!emoji || typeof emoji !== "string") {
-        throw new Error("emoji is required");
-    }
-
-    const filename = emojiToSvgFilename(emoji);
-    const svgPath = path.resolve(
-        projectRoot,
-        "assets",
-        "twemoji",
-        "svg",
-        filename,
-    );
-
-    if (!fs.existsSync(svgPath)) {
-        throw new Error(`Emoji SVG not found for '${emoji}' (${filename})`);
-    }
-
-    return fs.promises.readFile(svgPath, "utf-8");
-}
-
-export function validateIso6391(value) {
-    if (!value) return true;
-    return ISO6391.validate(value);
-}
-
-export function getAllIso6391Codes() {
-    return ISO6391.getAllCodes();
-}
-
-export function getIso6391Name(code) {
-    return ISO6391.getName(code);
-}
-
-export function getIso6391NativeName(code) {
-    return ISO6391.getNativeName(code);
-}
