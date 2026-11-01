@@ -44,15 +44,27 @@ const parseConfig = (raw: unknown): AppConfig => {
   };
 };
 
+// The app waits for this before its first render, so it MUST give up quickly:
+// without a timeout a stalled request left a blank page forever (OLS).
+const CONFIG_TIMEOUT_MS = 3000;
+
 const loadConfigFrom = async (path: string): Promise<AppConfig> => {
-  const response = await fetch(path, { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error(`Failed to load ${path}`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CONFIG_TIMEOUT_MS);
+  try {
+    const response = await fetch(path, { cache: 'no-store', signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(`Failed to load ${path}`);
+    }
+    const json = await response.json();
+    return parseConfig(json);
+  } finally {
+    clearTimeout(timer);
   }
-  const json = await response.json();
-  return parseConfig(json);
 };
 
+// Falls back to the built-in defaults. (The example file is no longer fetched:
+// it lives outside public/ so it isn't served to every visitor.)
 export const initAppConfig = async (): Promise<void> => {
   if (cachedConfig) {
     return;
@@ -61,11 +73,7 @@ export const initAppConfig = async (): Promise<void> => {
   try {
     cachedConfig = await loadConfigFrom('/config.json');
   } catch {
-    try {
-      cachedConfig = await loadConfigFrom('/config.example.json');
-    } catch {
-      cachedConfig = { ...DEFAULT_CONFIG };
-    }
+    cachedConfig = { ...DEFAULT_CONFIG };
   }
 };
 

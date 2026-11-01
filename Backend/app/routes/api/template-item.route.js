@@ -66,7 +66,15 @@ export default async function templateItemRoutes(fastify) {
   })
 
   // Update via POST (this template's REST surface is GET + POST only).
-  fastify.post('/:uuid', async (request, reply) => {
+  // The params schema rejects a malformed id with a 400 BEFORE it reaches
+  // Postgres — otherwise the uuid cast fails (22P02) and leaks as a 500.
+  const uuidParams = {
+    type: 'object',
+    required: ['uuid'],
+    properties: { uuid: { type: 'string', format: 'uuid' } },
+  }
+
+  fastify.post('/:uuid', { schema: { params: uuidParams } }, async (request, reply) => {
     const TemplateItems = ensureTemplateItemsModel(fastify, reply)
     if (!TemplateItems) {
       return

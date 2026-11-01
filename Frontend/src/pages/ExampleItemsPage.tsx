@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiUrl } from '../config';
+import { getJson, postJson } from '../api';
 
 type TemplateItem = {
   uuid: string;
@@ -35,14 +35,7 @@ export default function ExampleItemsPage() {
     setError('');
 
     try {
-      const response = await fetch(apiUrl('/api/template-items?limit=100'));
-      const result = await response.json();
-
-      if (!response.ok || !result?.ok) {
-        throw new Error(result?.message || 'Failed to load example items');
-      }
-
-      const rows: TemplateItem[] = result.data || [];
+      const rows = (await getJson<TemplateItem[]>('/api/template-items?limit=100')) || [];
       setItems(rows);
 
       if (rows.length > 0 && !selectedUuid) {
@@ -90,18 +83,7 @@ export default function ExampleItemsPage() {
     setMessage('');
 
     try {
-      const response = await fetch(apiUrl('/api/template-items'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const result = await response.json();
-
-      if (!response.ok || !result?.ok) {
-        throw new Error(result?.message || 'Failed to create item');
-      }
-
-      const created: TemplateItem = result.data;
+      const created = await postJson<TemplateItem>('/api/template-items', form);
       const nextItems = [created, ...items];
       setItems(nextItems);
       setSelectedUuid(created.uuid);
@@ -124,18 +106,7 @@ export default function ExampleItemsPage() {
     setMessage('');
 
     try {
-      const response = await fetch(apiUrl(`/api/template-items/${selectedUuid}`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const result = await response.json();
-
-      if (!response.ok || !result?.ok) {
-        throw new Error(result?.message || 'Failed to update item');
-      }
-
-      const updated: TemplateItem = result.data;
+      const updated = await postJson<TemplateItem>(`/api/template-items/${selectedUuid}`, form);
       setItems((current) => current.map((item) => item.uuid === updated.uuid ? updated : item));
       setMessage('Updated the selected example item.');
     } catch (err) {

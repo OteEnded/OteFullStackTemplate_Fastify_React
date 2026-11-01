@@ -16,14 +16,21 @@ const utilityFilePath = fileURLToPath(import.meta.url);
 const utilityDir = path.dirname(utilityFilePath);
 const projectRoot = path.resolve(utilityDir, "..");
 
+// A missing logging key falls back to the DEFAULT here, never to "on" — the old
+// `!== false` checks turned every absent key into a live sink (DB writes, console
+// noise). Defaults: file only, plus message lines on the console.
+function flag(value, fallback) {
+    return typeof value === "boolean" ? value : fallback;
+}
+
 function getLogOptions() {
     const config = loadConfig();
     const messageConfig = config?.logging?.message || {};
 
     return {
-        logToFile: messageConfig.log_to_file !== false,
-        logToConsole: messageConfig.log_to_console !== false,
-        logToDatabase: messageConfig.log_to_database !== false,
+        logToFile: flag(messageConfig.log_to_file, true),
+        logToConsole: flag(messageConfig.log_to_console, true),
+        logToDatabase: flag(messageConfig.log_to_database, false),
         logDirectory: messageConfig.log_directory || "./logs",
         logFilePrefix: messageConfig.log_file_prefix || "message_",
         logFilePostfix: messageConfig.log_file_postfix || "",
@@ -35,13 +42,24 @@ function getRequestLogOptions() {
     const requestConfig = config?.logging?.request || {};
 
     return {
-        logToFile: requestConfig.log_to_file !== false,
-        logToConsole: requestConfig.log_to_console !== false,
-        logToDatabase: requestConfig.log_to_database !== false,
+        logToFile: flag(requestConfig.log_to_file, true),
+        logToConsole: flag(requestConfig.log_to_console, false),
+        logToDatabase: flag(requestConfig.log_to_database, false),
+        // What goes INTO a request log line. Off by default because headers,
+        // query strings and bodies carry secrets (session cookies, API keys,
+        // OAuth codes). Even when on, known-secret fields are redacted.
+        logHeaders: flag(requestConfig.log_headers, false),
+        logQuery: flag(requestConfig.log_query, false),
+        logBody: flag(requestConfig.log_body, false),
         logDirectory: requestConfig.log_directory || "./logs",
         logFilePrefix: requestConfig.log_file_prefix || "requests_",
         logFilePostfix: requestConfig.log_file_postfix || "",
     };
+}
+
+export function getRequestLogContentOptions() {
+    const { logHeaders, logQuery, logBody } = getRequestLogOptions();
+    return { logHeaders, logQuery, logBody };
 }
 
 function getQueryLogOptions() {
@@ -49,8 +67,8 @@ function getQueryLogOptions() {
     const sequelizeConfig = config?.logging?.sequelize || {};
 
     return {
-        logToFile: sequelizeConfig.log_to_file !== false,
-        logToConsole: sequelizeConfig.log_to_console !== false,
+        logToFile: flag(sequelizeConfig.log_to_file, true),
+        logToConsole: flag(sequelizeConfig.log_to_console, false),
         logDirectory: sequelizeConfig.log_directory || "./logs",
         logFilePrefix: sequelizeConfig.log_file_prefix || "queries_",
         logFilePostfix: sequelizeConfig.log_file_postfix || "",
@@ -78,7 +96,9 @@ export function loadConfig() {
         );
     }
 
-    const raw = fs.readFileSync(configPath, "utf-8");
+    // Strip a UTF-8 BOM: Windows editors (Notepad, some VS Code settings) save one,
+    // and JSON.parse rejects it with a confusing "Unexpected token" error.
+    const raw = fs.readFileSync(configPath, "utf-8").replace(/^﻿/, "");
 
     try {
         cachedConfig = JSON.parse(raw);
@@ -205,11 +225,16 @@ export async function log(message, level = "info", importMetaUrl) {
 
     let resolvedLevel = level;
     let resolvedImportMetaUrl = importMetaUrl;
+    let levelNote = "";
 
+    // Two call shapes are supported: log(msg, level, import.meta.url) and the
+    // short log(msg, import.meta.url). The second argument is only treated as
+    // the source URL when it IS a file URL — a typo'd level ("warnig") used to
+    // be silently taken as a path and the line was logged as INFO from nowhere.
     if (
         resolvedImportMetaUrl === undefined &&
         typeof resolvedLevel === "string" &&
-        !log_levels.includes(resolvedLevel.toLowerCase())
+        resolvedLevel.startsWith("file:")
     ) {
         resolvedImportMetaUrl = resolvedLevel;
         resolvedLevel = "info";
@@ -220,13 +245,14 @@ export async function log(message, level = "info", importMetaUrl) {
         : "info";
 
     if (!log_levels.includes(resolvedLevel)) {
+        levelNote = `[unknown level '${resolvedLevel}'] `;
         resolvedLevel = "info";
     }
 
     const relPath = getRelativePath(resolvedImportMetaUrl);
     const reportOn = new Date();
     const timestamp = formatTimestamp();
-    const normalizedMessage = String(message);
+    const normalizedMessage = levelNote + String(message);
     const logMessage = `[${timestamp}] [${resolvedLevel.toUpperCase()}] [${relPath}]: ${normalizedMessage}\n`;
 
     if (options.logToConsole) {
@@ -254,7 +280,7 @@ export async function log(message, level = "info", importMetaUrl) {
             } catch (err) {
                 console.error("Error writing log to database:", err);
             }
-        } else {
+        } else if (databaseWillExist()) {
             pendingLogRows.push({
                 server_start_on: serverStartOn,
                 report_by: relPath,
@@ -331,11 +357,57 @@ export function setDB(db_from_plugin_init) {
     }
 }
 
+// ---- Redaction -----------------------------------------------------------------
+// Request logs used to store every header and cookie verbatim, so live session
+// cookies and API keys landed in logs/requests_*.log and log_requests (found in
+// OLS, DCON, Portal, OSM, Otenization). These helpers are the single place that
+// decides what is too sensitive to keep.
+const SECRET_HEADER = /^(authorization|proxy-authorization|cookie|set-cookie|x-api-key|x-.*-(key|token|secret))$/i;
+const SECRET_FIELD = /(pass(word)?|secret|token|api[-_]?key|authorization|cookie|session|credential|otp|pin)/i;
+const REDACTED = "[redacted]";
+
+export function redactHeaders(headers = {}) {
+    const out = {};
+    for (const [name, value] of Object.entries(headers)) {
+        out[name] = SECRET_HEADER.test(name) ? REDACTED : value;
+    }
+    return out;
+}
+
+export function redactBody(value, depth = 0) {
+    if (value === null || typeof value !== "object") return value;
+    if (depth > 6) return "[too deep]";
+    if (Array.isArray(value)) return value.map((item) => redactBody(item, depth + 1));
+    const out = {};
+    for (const [key, inner] of Object.entries(value)) {
+        out[key] = SECRET_FIELD.test(key) ? REDACTED : redactBody(inner, depth + 1);
+    }
+    return out;
+}
+
+// Query strings carry one-time secrets (OAuth `code`, tickets) — values are
+// dropped unless logging.request.log_query is on, and secret-named keys are
+// redacted even then.
+export function redactUrl(url, keepQuery) {
+    const [pathname, query] = String(url).split("?", 2);
+    if (!query) return pathname;
+    if (!keepQuery) return `${pathname}?[query omitted]`;
+    const params = new URLSearchParams(query);
+    for (const key of [...params.keys()]) {
+        if (SECRET_FIELD.test(key) || key === "code" || key === "state") params.set(key, REDACTED);
+    }
+    return `${pathname}?${params.toString()}`;
+}
+
+function databaseWillExist() {
+    return loadConfig()?.database?.enabled !== false;
+}
+
 export async function logRequest(requestData) {
     const options = getRequestLogOptions();
     const timestamp = formatTimestamp();
 
-    const logLine = `[${timestamp}] ${requestData.request_method} ${requestData.request_protocol}://${requestData.request_to} from ${requestData.request_ip}\n`;
+    const logLine = `[${timestamp}] ${requestData.request_method} ${requestData.request_to} -> ${requestData.response_status} ${requestData.duration_ms}ms from ${requestData.request_ip}\n`;
 
     if (options.logToConsole) {
         console.log(logLine.trimEnd());
@@ -356,7 +428,7 @@ export async function logRequest(requestData) {
             } catch (err) {
                 console.error("Error writing request log to database:", err);
             }
-        } else {
+        } else if (databaseWillExist()) {
             pendingRequestLogRows.push(requestData);
         }
     }

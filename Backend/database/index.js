@@ -1,14 +1,14 @@
 import { Sequelize } from "sequelize";
 import { loadConfig, log, logQuery } from "../lib/utility.js";
 
-const config = loadConfig();
-
 import initModels from "./models/index.js";
 import seedTemplateItems from "./seeds/seed_template_items.js";
 
-const dbConfig = config.database.connection;
-
 export async function initDB() {
+    // Config is read HERE, not at module top: importing this file must have no
+    // side effects (it used to read config.json even with the database disabled).
+    const config = loadConfig();
+    const dbConfig = config.database.connection;
     const sequelizeLoggingConfig = config.logging?.sequelize || {};
     
     // Create logging function for Sequelize

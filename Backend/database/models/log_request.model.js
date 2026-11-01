@@ -40,25 +40,34 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 allowNull: false,
                 comment: "HTTP method used for the request (e.g., GET, POST, PUT, DELETE)",
             },
+            response_status: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                comment: "HTTP status code of the response",
+            },
+            duration_ms: {
+                type: DataTypes.FLOAT,
+                allowNull: true,
+                comment: "Time from request received to response sent, in milliseconds",
+            },
             request_header: {
                 type: DataTypes.JSONB,
                 allowNull: true,
-                comment: "Headers sent with the request",
+                comment: "Request headers, REDACTED (only when logging.request.log_headers is on)",
             },
             request_body: {
                 type: DataTypes.JSONB,
                 allowNull: true,
-                comment: "Body of the request",
-            },
-            request_cookies: {
-                type: DataTypes.JSONB,
-                allowNull: true,
-                comment: "Cookies sent with the request",
+                comment: "Parsed request body, REDACTED (only when logging.request.log_body is on)",
             },
         },
         {
             tableName: "log_requests",
-            timestamps: false,
+            // Append-only: created_at only. Mapped explicitly — turning timestamps
+            // on without the snake_case mapping broke every log write in OLS.
+            timestamps: true,
+            createdAt: "created_at",
+            updatedAt: false,
             schema: schemas.project,
             hooks: hooks?.logRequest || {}
         },

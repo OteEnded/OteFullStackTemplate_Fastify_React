@@ -1,6 +1,6 @@
 {
     "app": {
-        "port": 3000
+        "port": 8080
     },
     "logging": {
         "message": {
@@ -9,24 +9,27 @@
             "log_file_postfix": "",
             "log_to_file": true,
             "log_to_console": true,
-            "log_to_database": true
+            "log_to_database": false
         },
         "request": {
             "log_directory": "./logs",
             "log_file_prefix": "requests_",
             "log_file_postfix": "",
             "log_to_file": true,
-            "log_to_console": true,
-            "log_to_database": true
+            "log_to_console": false,
+            "log_to_database": false,
+            "log_headers": false,
+            "log_query": false,
+            "log_body": false
         },
-        "fastify": true,
+        "fastify": false,
         "sequelize": {
             "benchmark": true,
             "log_directory": "./logs",
             "log_file_prefix": "queries_",
             "log_file_postfix": "",
             "log_to_file": true,
-            "log_to_console": true
+            "log_to_console": false
         }
     },
     "database": {

@@ -44,7 +44,10 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
     }
   }, {
     tableName: 'log_messages',
-    timestamps: false,
+    // Append-only: created_at only (see log_request.model.js)
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false,
     schema: schemas.project,
     hooks: hooks?.logMessage || {}
   })

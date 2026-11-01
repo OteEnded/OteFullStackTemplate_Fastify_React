@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getAppConfig, apiUrl } from '../config';
+import { getAppConfig } from '../config';
+import { getJson } from '../api';
 
 type TemplateMeta = {
   name: string;
@@ -17,14 +18,7 @@ export default function HomePage() {
   useEffect(() => {
     const run = async () => {
       try {
-        const response = await fetch(apiUrl('/api/template/meta'));
-        const result = await response.json();
-
-        if (!response.ok || !result?.ok) {
-          throw new Error(result?.message || 'Failed to load template metadata');
-        }
-
-        setMeta(result.data);
+        setMeta(await getJson<TemplateMeta>('/api/template/meta'));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unexpected error');
       }

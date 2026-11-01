@@ -4,7 +4,8 @@ Reusable React + Vite frontend for the full-stack template.
 
 ## What It Does
 
-- Loads runtime config from `public/config.json` with fallback to `public/config.example.json`.
+- Loads runtime config from `public/config.json` (3 s timeout) with fallback to built-in defaults. The documented shape is `config.example.json` at the Frontend root — kept out of `public/` so it isn't served to visitors.
+- API calls go through `src/api.ts` (`getJson` / `postJson` — the template's surface is GET + POST only).
 - Uses React Router for a small starter UI.
 - Includes Tailwind CSS in the frontend toolchain through PostCSS.
 - Talks to the Fastify backend example API.
