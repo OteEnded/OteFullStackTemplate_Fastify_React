@@ -6,6 +6,9 @@ import { CHOICES } from '../../../database/models/index.js'
 //   - JSON schemas validate input BEFORE the handler runs; a bad request becomes
 //     { ok:false, message, code:'invalid_request', details } via the error handler
 //   - every reply is { ok:true, data } or { ok:false, message, code }
+//   - with the auth module on, every route here needs a signed-in user (requireSignedIn is
+//     a no-op while auth is off); writes need the items.write permission
+//   - changes are pushed to browsers through the realtime module (if enabled)
 
 function ensureTemplateItemsModel(fastify, reply) {
   if (!fastify.db?.mst_template_items) {
@@ -58,7 +61,7 @@ const uuidParams = {
 }
 
 export default async function templateItemRoutes(fastify) {
-  fastify.get('/', { schema: { querystring: listQuery } }, async (request, reply) => {
+  fastify.get('/', { onRequest: fastify.requireSignedIn, schema: { querystring: listQuery } }, async (request, reply) => {
     const TemplateItems = ensureTemplateItemsModel(fastify, reply)
     if (!TemplateItems) {
       return
@@ -74,7 +77,7 @@ export default async function templateItemRoutes(fastify) {
     return reply.send({ ok: true, data: rows })
   })
 
-  fastify.post('/', { schema: { body: createBody } }, async (request, reply) => {
+  fastify.post('/', { onRequest: fastify.requirePermission('items.write'), schema: { body: createBody } }, async (request, reply) => {
     const TemplateItems = ensureTemplateItemsModel(fastify, reply)
     if (!TemplateItems) {
       return
@@ -86,11 +89,12 @@ export default async function templateItemRoutes(fastify) {
     }
 
     const row = await TemplateItems.create({ name, summary: summary.trim(), status, priority })
+    fastify.realtime.publish('items', 'item.created', { uuid: row.uuid })
     return reply.code(201).send({ ok: true, data: row })
   })
 
   // Update via POST /:uuid (GET + POST only — there is no PATCH/PUT here by design).
-  fastify.post('/:uuid', { schema: { params: uuidParams, body: updateBody } }, async (request, reply) => {
+  fastify.post('/:uuid', { onRequest: fastify.requirePermission('items.write'), schema: { params: uuidParams, body: updateBody } }, async (request, reply) => {
     const TemplateItems = ensureTemplateItemsModel(fastify, reply)
     if (!TemplateItems) {
       return
@@ -113,6 +117,7 @@ export default async function templateItemRoutes(fastify) {
       ...(priority !== undefined && { priority }),
     })
 
+    fastify.realtime.publish('items', 'item.updated', { uuid: row.uuid })
     return reply.send({ ok: true, data: row })
   })
 }

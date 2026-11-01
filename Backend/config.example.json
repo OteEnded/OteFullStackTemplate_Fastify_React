@@ -56,6 +56,52 @@
             "storage": "./data/app.sqlite"
         }
     },
+    "auth": {
+        "enabled": false,
+        "session": {
+            "secret": "CHANGE_ME",
+            "cookie_name": "",
+            "max_age_hours": 12,
+            "secure": "auto"
+        },
+        "root": {
+            "enabled": true,
+            "username": "root",
+            "password_hash": ""
+        },
+        "local_users": {
+            "enabled": false
+        },
+        "oteracount": {
+            "enabled": false,
+            "issuer": "",
+            "clientId": "",
+            "clientSecret": "CHANGE_ME",
+            "redirectUri": "",
+            "postLogoutRedirectUri": "",
+            "scopes": "openid profile email",
+            "default_role": "user"
+        },
+        "roles": {
+            "admin": ["*"],
+            "user": []
+        },
+        "rate_limit": {
+            "max_failures": 8,
+            "window_minutes": 15
+        }
+    },
+    "realtime": {
+        "sse": {
+            "enabled": false
+        },
+        "websocket": {
+            "enabled": false
+        }
+    },
+    "security": {
+        "secret_box_key": ""
+    },
     "_comments": {
         "app.name": "Human-readable name — shown by /api/health and in the UI.",
         "app.slug": "Short machine id (lowercase, dashes). Used for things that must be unique per app on one host, e.g. the session cookie name.",
@@ -70,6 +116,14 @@
         "database.schema_mode": "migrate (default, Postgres) = the SQL files in database/migrations/ own the schema; run `npm run db:migrate` before starting — the server refuses to start with pending migrations. sync = models create missing tables (prototypes, SQLite, other dialects); never alters.",
         "database.connection.dialect": "postgres (first-class) · mysql · mariadb · mssql · sqlite. Each needs its driver installed in Backend: pg (included) · mysql2 · mariadb · tedious · sqlite3 (native module: a SQLite project can't become a portable EXE).",
         "database.connection.schemas.project": "Postgres: this app's own schema (one database, one schema per app). Tests use <project>_test. Ignored by other dialects.",
-        "database.connection.storage": "SQLite only: the database file, relative to Backend/."
+        "database.connection.storage": "SQLite only: the database file, relative to Backend/.",
+        "auth": "OPTIONAL sign-in module (app/modules/auth). enabled:false = no sign-in anywhere. The wizard fills the secret and the root password hash.",
+        "auth.session": "secret: 32+ random chars (wizard generates). cookie_name: empty = <app.slug>_session (unique per app — apps on one host must not share it). secure: auto = only over https.",
+        "auth.root": "The config account: works with no database and with Oteracount down. password_hash is bcrypt — make one with `npm run auth:hash-password`.",
+        "auth.local_users": "Accounts in the mst_users table (needs the database + migration 003). Manage with `npm run auth:user`.",
+        "auth.oteracount": "Login with Oteracount (Ote's OIDC provider). Register the client first — see C:\\data\\Otenization\\Reference\\docs\\GUIDE_OOAuth_for_apps.md. Keys keep the guide's names. redirectUri = <public origin>/api/auth/oteracount/callback, exactly as registered.",
+        "auth.roles": "role -> permissions. '*' = everything. Use with fastify.requirePermission('x') on routes.",
+        "realtime": "OPTIONAL push to browsers: sse -> GET /api/events, websocket -> GET /api/ws. Both fed by fastify.realtime.publish(channel, type, data). Push only — actions go through the API.",
+        "security.secret_box_key": "Key for lib/crypto-box.js makeBox() — seal recoverable secrets (API keys, SMTP passwords) before storing them. 32+ random chars (wizard generates)."
     }
 }

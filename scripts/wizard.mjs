@@ -15,7 +15,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import readline from "node:readline/promises";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { demoPresent, removeDemo } from "./lib/demo.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -66,14 +66,20 @@ const runNpm = (command, cwd) => spawnSync(`npm ${command}`, { cwd, stdio: "inhe
 const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "app";
 const secret = () => crypto.randomBytes(32).toString("base64url");
 
-// Any config value still "CHANGE_ME" under a secret-looking key gets a fresh random value.
-function fillSecrets(node, trail = []) {
+// Secrets the wizard may GENERATE — an explicit list on purpose. A secret that comes from
+// somewhere else (e.g. auth.oteracount.clientSecret, issued when the client is registered
+// in Oteracount) must stay a visible placeholder until a person pastes the real one.
+const GENERATED_SECRETS = [
+    ["auth", "session", "secret"],
+    ["security", "secret_box_key"],
+];
+function fillSecrets(config) {
     let count = 0;
-    for (const [key, value] of Object.entries(node ?? {})) {
-        if (key === "_comments") continue;
-        if (value && typeof value === "object") count += fillSecrets(value, [...trail, key]);
-        else if (value === "CHANGE_ME" && /secret|salt|key|token/i.test(key)) {
-            node[key] = secret();
+    for (const keys of GENERATED_SECRETS) {
+        const parent = keys.slice(0, -1).reduce((node, key) => node?.[key], config);
+        const last = keys.at(-1);
+        if (parent && (parent[last] === "" || parent[last] === "CHANGE_ME")) {
+            parent[last] = secret();
             count++;
         }
     }
@@ -141,6 +147,36 @@ async function main() {
                 }
             }
         }
+
+        // --- optional modules ---
+        const auth = config.auth;
+        auth.enabled = await yes("auth", "Enable sign-in (the auth module)?", false);
+        if (auth.enabled) {
+            const rootPassword = await ask("root_password", "Root password (config account, works without a DB; stored only as a bcrypt hash)", "", {
+                validate: (v) => (v.length >= 10 ? null : "at least 10 characters"),
+            });
+            // Hashing needs bcryptjs; on a fresh clone the Backend isn't installed yet — do it now.
+            const bcryptFile = path.join(BACKEND, "node_modules", "bcryptjs", "index.js");
+            if (!fs.existsSync(bcryptFile)) {
+                say("Installing Backend dependencies (needed to hash the password)...");
+                if (!runNpm("install --no-fund --no-audit", BACKEND)) throw new Error("npm install in Backend failed");
+            }
+            const { default: bcrypt } = await import(pathToFileURL(bcryptFile).href);
+            auth.root.password_hash = await bcrypt.hash(rootPassword, 12);
+            auth.local_users.enabled = config.database.enabled === true && (await yes("local_users", "Local user accounts in the database (npm run auth:user)?", true));
+            auth.oteracount.enabled = await yes("oteracount", "Login with Oteracount? (register the client first — GUIDE_OOAuth_for_apps.md)", false);
+            if (auth.oteracount.enabled) {
+                auth.oteracount.issuer = await ask("oteracount_issuer", "Oteracount issuer URL", "");
+                auth.oteracount.clientId = await ask("oteracount_client_id", "Client ID (as registered)", slug);
+                auth.oteracount.clientSecret = await ask("oteracount_client_secret", "Client secret (from the registration)", "CHANGE_ME");
+                const origin = await ask("public_origin", "This app's public origin (what browsers use)", `http://localhost:${port}`);
+                auth.oteracount.redirectUri = `${origin}/api/auth/oteracount/callback`;
+                auth.oteracount.postLogoutRedirectUri = `${origin}/login`;
+                say(`Register this redirect URI in Oteracount exactly: ${auth.oteracount.redirectUri}`);
+            }
+        }
+        config.realtime.sse.enabled = await yes("sse", "Server-Sent Events push (GET /api/events)?", false);
+        config.realtime.websocket.enabled = await yes("websocket", "WebSocket push (GET /api/ws)?", false);
 
         const generated = fillSecrets(config);
         writeJson(configFile, config);

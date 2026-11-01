@@ -8,12 +8,38 @@ import { getDbConfig } from "./db-config.js";
 
 const PLACEHOLDER = /CHANGE_ME/i;
 
+// Walks every value — except inside a block switched off with `enabled: false`: a
+// placeholder in a feature you don't use is not a problem.
 function walk(value, path, visit) {
     visit(value, path);
-    if (value && typeof value === "object") {
+    if (value && typeof value === "object" && value.enabled !== false) {
         for (const [key, inner] of Object.entries(value)) {
             if (key === "_comments") continue;
             walk(inner, path ? `${path}.${key}` : key, visit);
+        }
+    }
+}
+
+const BCRYPT = /^\$2[aby]\$\d{2}\$.{53}$/;
+
+function checkAuth(config, problems) {
+    const auth = config.auth;
+    if (auth?.enabled !== true) return;
+    const secret = auth.session?.secret;
+    if (typeof secret !== "string" || secret.length < 32) {
+        problems.push("auth.session.secret must be at least 32 random characters (the wizard generates one)");
+    }
+    const anyMethod = auth.root?.enabled !== false || auth.local_users?.enabled || auth.oteracount?.enabled;
+    if (!anyMethod) problems.push("auth is enabled but every sign-in method is off — nobody could sign in");
+    if (auth.root?.enabled !== false && !BCRYPT.test(auth.root?.password_hash ?? "")) {
+        problems.push("auth.root.password_hash is not a bcrypt hash — set one with `npm run auth:hash-password` (or disable auth.root)");
+    }
+    if (auth.local_users?.enabled && config.database?.enabled === false) {
+        problems.push("auth.local_users needs the database (database.enabled is false)");
+    }
+    if (auth.oteracount?.enabled) {
+        for (const key of ["issuer", "clientId", "clientSecret", "redirectUri"]) {
+            if (!auth.oteracount[key]) problems.push(`auth.oteracount.${key} is empty (auth.oteracount.enabled is on)`);
         }
     }
 }
@@ -69,6 +95,11 @@ export function checkConfig(config) {
     if (app.body_limit_mb !== undefined && !(typeof app.body_limit_mb === "number" && app.body_limit_mb > 0)) {
         problems.push(`app.body_limit_mb must be a positive number (megabytes)`);
     }
+
+    checkAuth(config, problems);
+
+    const boxKey = config?.security?.secret_box_key;
+    if (boxKey && boxKey.length < 32) problems.push("security.secret_box_key must be at least 32 characters (or empty if unused)");
 
     // Database settings: the same rules the DB layer itself enforces (lib/db-config.js).
     if (config?.database?.enabled !== false) {

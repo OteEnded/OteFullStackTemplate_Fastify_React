@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import log_messages from "./log_messages.model.js";
 import log_requests from "./log_requests.model.js";
+import mst_users from "./mst_users.model.js";
 import mst_template_items from "./mst_template_items.model.js"; // @demo
 
 // ⭐ Table naming (Ote's standard): a data-class prefix + ONE name end to end.
@@ -23,6 +24,7 @@ export const CHOICES = {
 const MODEL_FACTORIES = {
     log_messages,
     log_requests,
+    mst_users,
     mst_template_items, // @demo
 };
 

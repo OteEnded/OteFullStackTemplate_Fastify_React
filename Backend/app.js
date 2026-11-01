@@ -12,7 +12,8 @@ import errorHandlerPlugin from './app/plugins/error-handler.js'
 import requestLoggerPlugin from './app/plugins/request-logger.js'
 import dbPlugin from './app/plugins/db.js'
 import cronPlugin from './app/plugins/cron.js'
-import websocketPlugin from './app/plugins/websocket.js'
+import authModule from './app/modules/auth/index.js'
+import realtimeModule from './app/modules/realtime/index.js'
 import routes from './app/routes/index.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -62,7 +63,10 @@ export async function buildApp(config, overrides = {}) {
   }
 
   await fastify.register(cronPlugin)
-  await fastify.register(websocketPlugin)
+
+  // Optional modules — each is off until enabled in config.json, and removable (see its header).
+  await fastify.register(authModule)
+  await fastify.register(realtimeModule)
 
   const distDir = join(__dirname, 'public', 'dist')
   if (fs.existsSync(distDir)) {
