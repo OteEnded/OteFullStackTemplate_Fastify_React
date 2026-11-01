@@ -30,6 +30,8 @@ try {
     check("starts on SQLite and health reports db up", health.data?.db === "up", JSON.stringify(health));
     check("sync created the database file", fs.existsSync(storage));
 
+    // CRUD through the demo feature — only while it exists (the wizard can remove it).
+    if (fs.existsSync(path.join(BACKEND, "app", "routes", "api", "template-item.route.js"))) {
     const post = (url, body) => fetch(`${server.base}${url}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const created = await post("/api/template-items", { name: "sqlite item" });
     const item = (await created.json()).data;
@@ -40,6 +42,7 @@ try {
     check("update via POST /:uuid", updated.status === 200 && (await updated.json()).data?.status === "active");
     const list = await (await fetch(`${server.base}/api/template-items`)).json();
     check("list returns both rows", list.ok && list.data.length === 2);
+    }
 } catch (err) {
     check("SQLite checks could run", false, err.stack || err.message);
 } finally {

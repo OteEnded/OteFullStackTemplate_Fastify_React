@@ -1,4 +1,4 @@
-import exampleItemRoutes from './template-item.route.js'
+import exampleItemRoutes from './template-item.route.js' // @demo
 
 export default async function (fastify) {
   // You can add api-level permissions/middleware here in the future
@@ -37,6 +37,7 @@ export default async function (fastify) {
     return { ok: true, data }
   })
 
+  // @demo-start — template info for the demo overview page
   fastify.get('/template/meta', async () => {
     const dbEnabled = fastify.config?.database?.enabled !== false
 
@@ -55,8 +56,9 @@ export default async function (fastify) {
       },
     }
   })
+  // @demo-end
 
-  await fastify.register(exampleItemRoutes, { prefix: '/template-items' })
+  await fastify.register(exampleItemRoutes, { prefix: '/template-items' }) // @demo
 
   // Future: Add other API routes here
   // await fastify.register(otherRoutes, { prefix: '/other' })

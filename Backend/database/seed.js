@@ -8,9 +8,11 @@
 
 import { loadConfig } from "../lib/utility.js";
 import { initDB } from "./index.js";
-import seedTemplateItems from "./seeds/seed_template_items.js";
+import seedTemplateItems from "./seeds/seed_template_items.js"; // @demo
 
-const SEEDS = [seedTemplateItems];
+const SEEDS = [
+    seedTemplateItems, // @demo
+];
 
 const args = process.argv.slice(2);
 const configPath = args.includes("--config") ? args[args.indexOf("--config") + 1] : undefined;

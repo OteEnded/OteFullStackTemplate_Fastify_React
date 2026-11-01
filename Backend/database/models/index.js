@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import log_messages from "./log_messages.model.js";
 import log_requests from "./log_requests.model.js";
-import mst_template_items from "./mst_template_items.model.js";
+import mst_template_items from "./mst_template_items.model.js"; // @demo
 
 // ⭐ Table naming (Ote's standard): a data-class prefix + ONE name end to end.
 //   mst_  master — what exists (config, identity, definitions, reference data)
@@ -16,11 +16,15 @@ import mst_template_items from "./mst_template_items.model.js";
 // migrations (test/checks/database.check compares them), so they can't drift.
 export const CHOICES = {
     log_messages_level: ["info", "warning", "error"],
-    mst_template_items_status: ["draft", "active", "archived"],
-    mst_template_items_priority: ["low", "medium", "high"],
+    mst_template_items_status: ["draft", "active", "archived"], // @demo
+    mst_template_items_priority: ["low", "medium", "high"], // @demo
 };
 
-const MODEL_FACTORIES = { log_messages, log_requests, mst_template_items };
+const MODEL_FACTORIES = {
+    log_messages,
+    log_requests,
+    mst_template_items, // @demo
+};
 
 export default function initModels(sequelize, schemas) {
     const choices = CHOICES;
@@ -28,7 +32,7 @@ export default function initModels(sequelize, schemas) {
     // Sequelize lifecycle hooks, keyed by TABLE name. Add one entry per model whose
     // rows need logic on create/update/etc.
     const hooks = {
-        // Example usage on the demo table:
+        // @demo-start — example hook on the demo table
         mst_template_items: {
             // beforeSave runs before every create AND update. Here it normalizes
             // the name (trims surrounding whitespace) and keeps summary a string.
@@ -44,6 +48,7 @@ export default function initModels(sequelize, schemas) {
             // beforeUpdate, afterUpdate, afterFind, beforeDestroy, ...
             // Docs: https://sequelize.org/docs/v6/other-topics/hooks/
         },
+        // @demo-end
     };
 
     const models = {};

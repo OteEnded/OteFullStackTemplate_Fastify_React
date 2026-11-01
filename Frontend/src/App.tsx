@@ -1,6 +1,6 @@
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import ExampleItemsPage from './pages/ExampleItemsPage';
+import ExampleItemsPage from './pages/ExampleItemsPage'; // @demo
 import './index.css';
 
 export default function App() {
@@ -24,14 +24,16 @@ export default function App() {
             <NavLink to="/" end className={({ isActive }) => isActive ? 'app-nav-link active' : 'app-nav-link'}>
               Overview
             </NavLink>
+            {/* @demo-start */}
             <NavLink to="/items" className={({ isActive }) => isActive ? 'app-nav-link active' : 'app-nav-link'}>
               Example Items
             </NavLink>
+            {/* @demo-end */}
           </nav>
 
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/items" element={<ExampleItemsPage />} />
+            <Route path="/items" element={<ExampleItemsPage />} /> {/* @demo */}
           </Routes>
         </section>
       </main>

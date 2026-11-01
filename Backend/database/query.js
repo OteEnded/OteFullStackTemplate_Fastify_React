@@ -11,7 +11,7 @@ import { QueryTypes } from "sequelize";
 //     (->:x): write CAST(x AS type) instead of x::type next to a replacement (Oteracount
 //     2026-10-04 live 500).
 //
-//   const rows = await select(db.sequelize, "SELECT * FROM mst_template_items WHERE status = :status", { status: "active" })
+//   const rows = await select(db.sequelize, "SELECT * FROM txn_orders WHERE status = :status", { status: "open" })
 
 export async function select(sequelize, sql, replacements = {}) {
     return sequelize.query(sql, { replacements, type: QueryTypes.SELECT });

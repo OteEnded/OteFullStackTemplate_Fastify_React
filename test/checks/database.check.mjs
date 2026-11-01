@@ -3,6 +3,7 @@
 // a database your (non-superuser) test account may create schemas in. Everything runs in its
 // OWN schema (<project>_test) and that schema is dropped afterwards — never the real one.
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
@@ -14,6 +15,11 @@ if (!database) {
     skip("no test/test.config.json — copy test/test.config.example.json and fill in a test database to run DB checks");
     process.exit(0);
 }
+
+// The demo feature may have been removed by the wizard — its checks run only while it exists.
+const HAS_DEMO = fs.existsSync(path.join(BACKEND, "app", "routes", "api", "template-item.route.js"));
+const { readMigrationFiles } = await import(pathToFileURL(path.join(BACKEND, "database", "migration-files.js")).href);
+const MIGRATIONS = readMigrationFiles();
 
 const { check, done } = makeChecker("database.check — migrations, schema guard and the app against Postgres");
 const baseSchema = database.connection?.schemas?.project || "app";
@@ -56,11 +62,14 @@ try {
 
     // 2. Migrate, then migrate again.
     let run = node("database/migrate.js");
-    check("db:migrate applies every migration (exit 0)", run.code === 0 && /2 migration\(s\) applied/.test(run.out), run.out.trim());
+    check(`db:migrate applies all ${MIGRATIONS.length} migration(s) (exit 0)`, run.code === 0 && run.out.includes(`${MIGRATIONS.length} migration(s) applied`), run.out.trim());
     run = node("database/migrate.js");
     check("db:migrate a second time applies nothing", run.code === 0 && /nothing to apply/.test(run.out), run.out.trim());
     run = node("database/migrate.js", "--status");
-    check("db:status lists both files as applied", (run.out.match(/applied /g) || []).length === 2, run.out.trim());
+    check("db:status lists every file as applied", (run.out.match(/applied /g) || []).length === MIGRATIONS.length, run.out.trim());
+    // While the record is clean and non-empty (later steps corrupt / empty it on purpose).
+    run = node("database/migrate.js", "--baseline", MIGRATIONS[0].filename.slice(0, 3));
+    check("--baseline is refused once a record exists", run.code === 1 && /only for a database with no record/.test(run.out), run.out.trim());
 
     // 3. CHECK constraints mirror CHOICES (one list for model, schema and database).
     const { CHOICES } = await import(pathToFileURL(path.join(BACKEND, "database", "models", "index.js")).href);
@@ -81,6 +90,7 @@ try {
     const health = await (await fetch(`${server.base}/api/health`)).json();
     check("health reports db up", health.data?.db === "up", JSON.stringify(health));
 
+    if (HAS_DEMO) {
     const post = (url, body) => fetch(`${server.base}${url}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const created = await post("/api/template-items", { name: "db check item", status: "active" });
     const item = (await created.json()).data;
@@ -91,6 +101,7 @@ try {
     check("update of an unknown uuid -> 404 not_found", missing.status === 404 && (await missing.json()).code === "not_found");
     const list = await (await fetch(`${server.base}/api/template-items?status=active`)).json();
     check("list filtered by status", list.ok && list.data.some((row) => row.uuid === item.uuid));
+    }
 
     await new Promise((r) => setTimeout(r, 600));
     const logs = await q(`SELECT response_status, duration_ms, request_header, created_at FROM "${schema}".log_requests ORDER BY rolling_id DESC LIMIT 5`);
@@ -102,32 +113,30 @@ try {
     server = null;
 
     // 6. Seeds are a script, not a boot step.
+    if (HAS_DEMO) {
     run = node("database/seed.js");
     const seeded = await q(`SELECT count(*)::int AS n FROM "${schema}".mst_template_items`);
     check("db:seed adds the demo rows", run.code === 0 && seeded[0].n >= 4, `${run.out.trim()} rows=${seeded[0].n}`);
     run = node("database/seed.js", "--reset");
     const reset = await q(`SELECT count(*)::int AS n FROM "${schema}".mst_template_items`);
     check("db:reset-demo leaves exactly the seed rows", run.code === 0 && reset[0].n === 3, `rows=${reset[0].n}`);
+    }
 
     // 7. The guard's refusals.
-    await q(`UPDATE "${schema}".log_migrations SET checksum = repeat('0', 64) WHERE filename LIKE '002%'`);
+    await q(`UPDATE "${schema}".log_migrations SET checksum = repeat('0', 64) WHERE filename = $1`, [MIGRATIONS[0].filename]);
     run = node("database/migrate.js");
     check("an edited applied migration is refused by db:migrate", run.code === 1 && /changed since they ran/.test(run.out), run.out.trim());
     boot = await bootRefused();
     check("... and by the server at boot", boot.code === 1 && /edited afterwards/.test(boot.out), `code ${boot.code}`);
-    await q(`DELETE FROM "${schema}".log_migrations WHERE filename LIKE '002%'`);
+    await q(`DELETE FROM "${schema}".log_migrations WHERE filename = $1`, [MIGRATIONS[0].filename]);
     boot = await bootRefused();
     check("a pending migration refuses boot", boot.code === 1 && /pending migration/.test(boot.out), `code ${boot.code}`);
-    run = node("database/migrate.js", "--baseline", "002");
-    check("--baseline is refused once a record exists", run.code === 1 && /only for a database with no record/.test(run.out));
-    // Re-record 002 as applied (its table still exists) to get back to a clean state.
-    const { readMigrationFiles } = await import(pathToFileURL(path.join(BACKEND, "database", "migration-files.js")).href);
-    const f002 = readMigrationFiles().find((f) => f.filename.startsWith("002"));
-    await q(`INSERT INTO "${schema}".log_migrations (filename, checksum, applied_by) VALUES ($1, $2, current_user)`, [f002.filename, f002.checksum]);
-    await q(`ALTER TABLE "${schema}".mst_template_items RENAME TO mst_template_items_moved`);
+    // Re-record it as applied (its tables still exist) to get back to a clean state.
+    await q(`INSERT INTO "${schema}".log_migrations (filename, checksum, applied_by) VALUES ($1, $2, current_user)`, [MIGRATIONS[0].filename, MIGRATIONS[0].checksum]);
+    await q(`ALTER TABLE "${schema}".log_requests RENAME TO log_requests_moved`);
     boot = await bootRefused();
-    check("a model whose table is missing refuses boot", boot.code === 1 && /model\(s\) without a table: mst_template_items/.test(boot.out), `code ${boot.code}`);
-    await q(`ALTER TABLE "${schema}".mst_template_items_moved RENAME TO mst_template_items`);
+    check("a model whose table is missing refuses boot", boot.code === 1 && /model\(s\) without a table: log_requests/.test(boot.out), `code ${boot.code}`);
+    await q(`ALTER TABLE "${schema}".log_requests_moved RENAME TO log_requests`);
 } catch (err) {
     check("database checks could run", false, err.stack || err.message);
 } finally {

@@ -1,19 +1,30 @@
 @echo off
 setlocal
 REM ==========================================================================
-REM  Your project's DEV run script (Fastify + React), created at the repo root
-REM  by the wizard. Fastify serves the API AND the built frontend at
-REM  http://localhost:3000. Installs deps, builds the frontend, then runs the
-REM  backend in watch mode.
-REM  (This template lives in scripts\launchers\; the wizard copies it to root.)
-REM
-REM  To HOST on a server, use scripts\server_windows.bat instead.
+REM  DEV launcher (Windows) - created at the repo root by the wizard.
+REM  Installs deps if package.json changed, builds the frontend, applies DB
+REM  migrations, then runs the server in THIS window (Ctrl+C to stop).
+REM  No watch mode: after changing code, stop it and run it again.
+REM  The port is app.port in Backend\config.json.
+REM  For hosting / OteServerManager use server_windows.bat instead.
 REM ==========================================================================
-set "ROOT=%~dp0"
+cd /d "%~dp0"
 
-call "%ROOT%scripts\lib\install_windows.bat"
-call "%ROOT%scripts\lib\build_windows.bat"
+node scripts\lib\tasks.mjs dev
+if errorlevel 1 goto failed
 
-echo Starting Fastify (dev, watch) on http://localhost:3000 ...
-pushd "%ROOT%Backend" && call npm run dev
-endlocal
+cd Backend
+node server.js
+set "CODE=%errorlevel%"
+if not "%CODE%"=="0" (
+  echo.
+  echo Server stopped with exit code %CODE%.
+  pause
+)
+exit /b %CODE%
+
+:failed
+echo.
+echo A setup step failed - the server was NOT started. See the message above.
+pause
+exit /b 1

@@ -44,7 +44,7 @@ try {
     }
 
     // Secrets sent to the server never reach the request log file.
-    await fetch(`${server.base}/api/template-items?code=OAUTH_SECRET_1`, {
+    await fetch(`${server.base}/api/any-path?code=OAUTH_SECRET_1`, {
         method: "POST",
         headers: { "content-type": "application/json", cookie: "sid=COOKIE_SECRET_2", authorization: "Bearer AUTH_SECRET_3" },
         body: JSON.stringify({ name: "probe", password: "BODY_SECRET_4" }),
@@ -52,7 +52,7 @@ try {
     await new Promise((r) => setTimeout(r, 500));
     const logDir = config.logging.request.log_directory;
     const requestLogs = fs.readdirSync(logDir).filter((f) => f.startsWith("requests_")).map((f) => fs.readFileSync(path.join(logDir, f), "utf-8")).join("");
-    check("request log file was written", requestLogs.includes("POST /api/template-items"), requestLogs.slice(0, 200));
+    check("request log file was written", requestLogs.includes("POST /api/any-path"), requestLogs.slice(0, 200));
     check("no cookie / authorization / query / body secret in the request log", !/SECRET_[1-4]/.test(requestLogs));
 
     // A second instance on the same port must say so loudly and exit non-zero.

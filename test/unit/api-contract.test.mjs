@@ -1,5 +1,6 @@
 // The API contract every route follows: { ok:true, data } or { ok:false, message, code }.
 // In-process (buildApp + inject) with the database OFF — no port, no DB needed.
+// Uses its own test routes, so it holds whether or not the demo feature exists.
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { testConfig, loadBackend } from "../lib/backend.mjs";
@@ -11,6 +12,15 @@ let backend;
 before(async () => {
     backend = await loadBackend(config);
     app = await backend.buildApp(config);
+    app.post("/api/test-validate", {
+        schema: { body: { type: "object", required: ["name"], properties: { name: { type: "string", minLength: 1 } } } },
+    }, async (request) => ({ ok: true, data: request.body }));
+    app.get("/api/test-boom", async () => {
+        throw new Error("SELECT password FROM secrets failed");
+    });
+    app.get("/api/test-upstream", async () => {
+        throw new backend.http.UpstreamError("https://auth.example did not answer within 5000 ms", "upstream_timeout", 504);
+    });
 });
 after(async () => app?.close());
 
@@ -34,12 +44,6 @@ test("health answers in the envelope and names the service", async () => {
     assert.match(r.json.data.version, /^\d+\.\d+\.\d+/);
 });
 
-test("a DB-backed route with the DB off -> 503 db_disabled", async () => {
-    const r = await call("GET", "/api/template-items");
-    assert.equal(r.status, 503);
-    assert.equal(r.json.code, "db_disabled");
-});
-
 test("unknown API route -> 404 envelope with code not_found", async () => {
     const r = await call("GET", "/api/does-not-exist");
     assert.equal(r.status, 404);
@@ -48,55 +52,35 @@ test("unknown API route -> 404 envelope with code not_found", async () => {
 
 test("empty and malformed JSON bodies -> 400 invalid_request (not Fastify's own shape)", async () => {
     for (const payload of ["", "{bad"]) {
-        const r = await call("POST", "/api/template-items", { headers: { "content-type": "application/json" }, payload });
+        const r = await call("POST", "/api/test-validate", { headers: { "content-type": "application/json" }, payload });
         assert.equal(r.status, 400, `payload ${JSON.stringify(payload)}`);
         assert.equal(r.json.ok, false);
         assert.equal(r.json.code, "invalid_request");
     }
 });
 
-test("schema validation -> 400 invalid_request with details", async () => {
-    const missingName = await call("POST", "/api/template-items", { payload: { summary: "x" } });
-    assert.equal(missingName.status, 400);
-    assert.equal(missingName.json.code, "invalid_request");
-    assert.ok(Array.isArray(missingName.json.details) && missingName.json.details.length > 0);
+test("schema validation -> 400 invalid_request with details; valid input passes", async () => {
+    const bad = await call("POST", "/api/test-validate", { payload: { other: "x" } });
+    assert.equal(bad.status, 400);
+    assert.equal(bad.json.code, "invalid_request");
+    assert.ok(Array.isArray(bad.json.details) && bad.json.details.length > 0);
 
-    const badEnum = await call("POST", "/api/template-items", { payload: { name: "a", status: "bogus" } });
-    assert.equal(badEnum.status, 400);
-
-    const badLimit = await call("GET", "/api/template-items?limit=999");
-    assert.equal(badLimit.status, 400);
-});
-
-test("a malformed :uuid is a 400, never a database error", async () => {
-    const r = await call("POST", "/api/template-items/not-a-uuid", { payload: { name: "a" } });
-    assert.equal(r.status, 400);
-    assert.equal(r.json.code, "invalid_request");
+    const good = await call("POST", "/api/test-validate", { payload: { name: "a" } });
+    assert.deepEqual([good.status, good.json.ok], [200, true]);
 });
 
 test("a server error hides its detail and returns a request_id", async () => {
-    const own = await backend.buildApp(config);
-    own.get("/api/test-boom", async () => {
-        throw new Error("SELECT password FROM secrets failed");
-    });
-    const res = await own.inject({ method: "GET", url: "/api/test-boom" });
-    const body = res.json();
-    assert.equal(res.statusCode, 500);
-    assert.equal(body.code, "internal_error");
-    assert.ok(body.request_id);
-    assert.doesNotMatch(body.message, /password|SELECT/);
-    await own.close();
+    const r = await call("GET", "/api/test-boom");
+    assert.equal(r.status, 500);
+    assert.equal(r.json.code, "internal_error");
+    assert.ok(r.json.request_id);
+    assert.doesNotMatch(r.json.message, /password|SELECT/);
 });
 
 test("an exposed upstream error keeps its status and code", async () => {
-    const own = await backend.buildApp(config);
-    own.get("/api/test-upstream", async () => {
-        throw new backend.http.UpstreamError("https://auth.example did not answer within 5000 ms", "upstream_timeout", 504);
-    });
-    const res = await own.inject({ method: "GET", url: "/api/test-upstream" });
-    assert.equal(res.statusCode, 504);
-    assert.equal(res.json().code, "upstream_timeout");
-    await own.close();
+    const r = await call("GET", "/api/test-upstream");
+    assert.equal(r.status, 504);
+    assert.equal(r.json.code, "upstream_timeout");
 });
 
 test("static: a missing file is a 404, a page route gets the SPA", async () => {
