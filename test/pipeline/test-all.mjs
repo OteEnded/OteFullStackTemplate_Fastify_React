@@ -1,7 +1,8 @@
-// One command, real exit code.     npm run test-all   [-- --checks-only]
+// One command, real exit code.     npm run test-all   [-- --checks-only] [-- --ui]
 //
-// Runs unit/ (node:test), then every checks/*.check.mjs. Each suite is judged by
-// its PASS LINE — "ℹ fail 0" for node:test, "ALL CHECKS PASSED (n)" for a check —
+// Runs unit/ (node:test), then every checks/*.check.mjs, then (with --ui) every ui/*-ui.mjs
+// Playwright drive (needs `npm install` here + the frontend built into Backend/public/dist).
+// Each suite is judged by its PASS LINE — "ℹ fail 0" for node:test, "ALL CHECKS PASSED (n)" for a check —
 // never by its last line or exit code alone (a check whose last line was a log
 // line once hid a failure in the Portal). "SKIPPED: …" is neutral, not green.
 
@@ -43,6 +44,13 @@ if (!args.has("--checks-only")) {
 const checksDir = path.join(ROOT, "checks");
 for (const file of fs.readdirSync(checksDir).filter((f) => f.endsWith(".check.mjs")).sort()) {
     run(`checks/${file}`, [path.join("checks", file)], (out) => /ALL CHECKS PASSED \(\d+\)/.test(out));
+}
+
+if (args.has("--ui")) {
+    const uiDir = path.join(ROOT, "ui");
+    for (const file of fs.readdirSync(uiDir).filter((f) => f.endsWith("-ui.mjs")).sort()) {
+        run(`ui/${file}`, [path.join("ui", file)], (out) => /ALL CHECKS PASSED \(\d+\)/.test(out));
+    }
 }
 
 const red = rows.filter((r) => r.state === "RED  ");

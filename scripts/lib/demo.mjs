@@ -2,7 +2,7 @@
 // Do it BEFORE the first `db:migrate`, so the demo table never reaches a real schema
 // (Ote's standard: delete the demo chain before the first boot).
 //
-// The demo is (1) whole files, listed below, and (2) marked lines in shared files:
+// The demo is (1) whole files or folders, listed below, and (2) marked lines in shared files:
 //   ...code... // @demo                       one line
 //   // @demo-start  ...  // @demo-end         a block (JSX: {/* @demo-start */} … {/* @demo-end */})
 // Keep both up to date when the demo changes; test/unit + checks still pass after removal.
@@ -15,7 +15,7 @@ export const DEMO_FILES = [
     "Backend/database/models/mst_template_items.model.js",
     "Backend/database/migrations/002_demo_template_items.sql",
     "Backend/database/seeds/seed_template_items.js",
-    "Frontend/src/pages/ExampleItemsPage.tsx",
+    "Frontend/src/features/template-items", // a folder: the whole demo feature
     "test/unit/demo-items.test.mjs",
 ];
 
@@ -64,7 +64,7 @@ export function removeDemo(root) {
     for (const rel of DEMO_FILES) {
         const file = path.join(root, rel);
         if (fs.existsSync(file)) {
-            fs.rmSync(file);
+            fs.rmSync(file, { recursive: true, force: true }); // files and folders
             removed.push(rel);
         }
     }

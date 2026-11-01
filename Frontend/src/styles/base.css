@@ -1,0 +1,138 @@
+/* Base — imported into @layer base by index.css (after Tailwind's preflight). */
+
+html {
+	/* On <html> (painted on the canvas, below everything) — a body background would paint
+	   OVER the fixed glow layer below. */
+	min-height: 100%;
+	background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%) var(--bg);
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+	min-height: 100vh;
+	font-family: var(--font-sans);
+	font-size: var(--text-base);
+	line-height: var(--leading);
+	color: var(--ink);
+	background: transparent;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* The soft corner glows (Ote U1). A fixed layer behind everything — not
+   `background-attachment: fixed`, which iOS ignores. Decoration only. */
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background:
+		radial-gradient(900px 520px at 6% -12%, var(--bg-glow-a), transparent 62%),
+		radial-gradient(780px 520px at 104% 4%, var(--bg-glow-b), transparent 60%);
+}
+
+#root {
+	min-height: 100vh;
+	isolation: isolate;
+}
+
+h1, h2, h3, h4 {
+	margin: 0;
+	font-weight: 700;
+	line-height: 1.25;
+}
+
+p {
+	margin: 0;
+}
+
+a {
+	color: inherit;
+}
+
+code, kbd, samp, pre, .mono {
+	font-family: var(--font-mono);
+}
+
+::selection {
+	background: var(--accent-soft);
+	color: var(--accent-deep);
+}
+
+::placeholder {
+	color: var(--faint);
+	opacity: 1;
+}
+
+/* One focus ring for EVERYTHING keyboard-reachable (the console apps only had one on inputs). */
+:focus-visible {
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+}
+
+/* No page scroll-lock under an open dialog on purpose: locking removes the scrollbar and
+   shifts the page sideways, and a reserved gutter paints an empty band. The page behind a
+   modal <dialog> is inert anyway; dialog bodies contain their own scroll (components.css). */
+
+.num,
+time {
+	font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.skip-link {
+	position: fixed;
+	left: 12px;
+	top: -60px;
+	z-index: 100;
+	padding: 8px 14px;
+	border-radius: var(--radius);
+	background: var(--ink);
+	color: var(--bg);
+	font-weight: 600;
+	text-decoration: none;
+	transition: top 150ms;
+}
+.skip-link:focus {
+	top: 12px;
+}
+
+/* Theme switch animation — `theme-anim` rides on <html> for ~450ms around a toggle
+   (src/lib/theme.ts). Never permanent: global transitions make every hover mushy. */
+html.theme-anim,
+html.theme-anim *,
+html.theme-anim *::before,
+html.theme-anim *::after {
+	transition:
+		background-color 0.35s ease,
+		border-color 0.35s ease,
+		color 0.35s ease,
+		fill 0.35s ease,
+		box-shadow 0.35s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html.theme-anim,
+	html.theme-anim * {
+		transition: none !important;
+	}
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+	}
+}

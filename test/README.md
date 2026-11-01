@@ -2,13 +2,16 @@
 
 The project's tests live INSIDE the project (one folder, its own `package.json`). No test
 dependencies to install for unit + checks — they use Node's built-in `node:test` and the
-backend's own modules.
+backend's own modules. The UI drives need `npm install` here (Playwright; it drives the
+installed Microsoft Edge, so no browser download on Windows).
 
 ```bash
 cd test
 npm run test-all        # everything below — ONE command, real exit code
 npm run unit            # unit/ only
 npm run checks          # checks/ only
+npm run ui              # everything + ui/ drives  (= test-all --ui; build the frontend first)
+HEADED=1 node ui/console-ui.mjs   # one drive, in a visible browser
 ```
 (`npm test` in `Backend/` runs `test-all` too.)
 
@@ -18,7 +21,8 @@ npm run checks          # checks/ only
 | `checks/*.check.mjs` | **live** probes against a PRIVATE instance on the test port (`app.port + 1`, i.e. 8081) | port free |
 | `checks/database.check.mjs` | the app against a real DB, in its own `<project>_test` schema (dropped after) | `test/test.config.json` — else **SKIPPED** |
 | `pipeline/test-all.mjs` | runs all of the above, judges each suite by its PASS line | — |
-| `lib/` | `backend.mjs` (test config, start/stop a test server), `checker.mjs` (the checks contract) | — |
+| `ui/*-ui.mjs` | Playwright drives against a private instance serving the BUILT frontend: every page in light + dark at desktop + 375px, theme pre-paint, no sideways scroll, no console errors, demo flows (on a mocked items API). Screenshots → `shots/active/` (gitignored) — **look at them** | `npm install`, `npm run build` in Frontend, port free |
+| `lib/` | `backend.mjs` (test config, start/stop a test server), `checker.mjs` (the checks contract), `ui.mjs` (browser, pages, screenshots) | — |
 
 ## Rules
 

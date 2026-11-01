@@ -1,0 +1,1000 @@
+/* Component classes — imported into @layer components by index.css, so any Tailwind utility
+   on the same element wins (no `.btn.flex` hacks). Colours: tokens only (styles/tokens.css).
+   Sources: EAP gw-* / adm-*, Oteracount, OSM chips + toasts, Portal a11y. */
+
+/* ---------- buttons ---------- */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 34px;
+	padding: 6px 12px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--ink);
+	font: inherit;
+	font-size: var(--text-sm);
+	font-weight: 500;
+	line-height: 1.2;
+	white-space: nowrap;
+	text-decoration: none;
+	cursor: pointer;
+	user-select: none;
+	transition: background-color 120ms, border-color 120ms, color 120ms, filter 120ms;
+}
+.btn:hover {
+	background: var(--wash);
+	border-color: var(--edge);
+}
+.btn:active {
+	filter: brightness(0.96);
+}
+.btn:disabled,
+.btn[aria-disabled='true'] {
+	opacity: 0.55;
+	cursor: not-allowed;
+	filter: none;
+}
+.btn-primary {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--on-accent);
+	font-weight: 600;
+}
+.btn-primary:hover {
+	background: var(--accent);
+	border-color: var(--accent);
+	filter: brightness(1.08);
+}
+.btn-danger {
+	background: var(--danger-soft);
+	border-color: var(--danger-edge);
+	color: var(--danger);
+}
+.btn-danger:hover {
+	background: var(--danger-soft);
+	border-color: var(--danger);
+}
+.btn-warn {
+	background: var(--warn-soft);
+	border-color: var(--warn-edge);
+	color: var(--warn);
+}
+.btn-warn:hover {
+	background: var(--warn-soft);
+	border-color: var(--warn);
+}
+.btn-ghost {
+	background: transparent;
+	border-color: transparent;
+	color: var(--muted);
+}
+.btn-ghost:hover {
+	background: var(--wash);
+	border-color: transparent;
+	color: var(--ink);
+}
+.btn-sm {
+	min-height: 28px;
+	padding: 3px 9px;
+	font-size: var(--text-xs);
+	gap: 5px;
+}
+.btn-icon {
+	width: 34px;
+	padding: 0;
+}
+.btn-icon.btn-sm {
+	width: 28px;
+}
+.btn-block {
+	width: 100%;
+}
+
+/* ---------- form controls ---------- */
+.input {
+	display: block;
+	width: 100%;
+	min-height: 36px;
+	padding: 7px 10px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--ink);
+	font: inherit;
+	font-size: var(--text-base);
+	line-height: 1.4;
+	transition: border-color 120ms, box-shadow 120ms;
+}
+.input:hover {
+	border-color: var(--line-strong);
+}
+.input:focus {
+	outline: none;
+	border-color: var(--focus);
+	box-shadow: 0 0 0 3px var(--wash);
+}
+.input:focus-visible {
+	outline: none;
+}
+.input[aria-invalid='true'] {
+	border-color: var(--danger);
+}
+.input:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+textarea.input {
+	min-height: 84px;
+	resize: vertical;
+}
+.select-wrap {
+	position: relative;
+	display: block;
+}
+.select-wrap > select.input {
+	appearance: none;
+	padding-right: 32px;
+	cursor: pointer;
+}
+.select-wrap > .select-chevron {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	translate: 0 -50%;
+	color: var(--muted);
+	pointer-events: none;
+}
+.input-icon-wrap {
+	position: relative;
+	display: block;
+}
+.input-icon-wrap > .input-icon {
+	position: absolute;
+	left: 10px;
+	top: 50%;
+	translate: 0 -50%;
+	color: var(--faint);
+	pointer-events: none;
+}
+.input-icon-wrap > .input {
+	padding-left: 32px;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	min-width: 0;
+}
+.field-label {
+	font-size: var(--text-sm);
+	font-weight: 500;
+	color: var(--ink);
+}
+.field-label .field-optional {
+	color: var(--faint);
+	font-weight: 400;
+}
+.field-hint {
+	font-size: var(--text-xs);
+	color: var(--muted);
+}
+.field-error {
+	font-size: var(--text-xs);
+	color: var(--danger);
+}
+
+.check {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-size: var(--text-sm);
+	cursor: pointer;
+}
+.check > input {
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	accent-color: var(--accent);
+	cursor: pointer;
+}
+
+/* Switch = a real checkbox (role="switch"), restyled. */
+.switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-size: var(--text-sm);
+	cursor: pointer;
+}
+.switch > input {
+	appearance: none;
+	position: relative;
+	flex: none;
+	width: 34px;
+	height: 20px;
+	margin: 0;
+	border-radius: var(--radius-full);
+	border: 1px solid var(--line-strong);
+	background: var(--surface-sunken);
+	cursor: pointer;
+	transition: background-color 150ms, border-color 150ms;
+}
+.switch > input::after {
+	content: '';
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: var(--muted);
+	transition: translate 150ms, background-color 150ms;
+}
+.switch > input:checked {
+	background: var(--accent);
+	border-color: var(--accent);
+}
+.switch > input:checked::after {
+	translate: 14px 0;
+	background: var(--on-accent);
+}
+.switch > input:disabled,
+.check > input:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* PasswordInput — the eye sits inside the field. */
+.pw-wrap {
+	position: relative;
+}
+.pw-wrap > .input {
+	padding-right: 64px;
+}
+.pw-peek {
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	translate: 0 -50%;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 28px;
+	padding: 0 8px;
+	border: 0;
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--muted);
+	font-size: var(--text-xs);
+	cursor: pointer;
+}
+.pw-peek:hover {
+	background: var(--wash);
+	color: var(--ink);
+}
+
+/* ---------- surfaces ---------- */
+.card {
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-card);
+}
+.card-pad {
+	padding: 18px;
+}
+.card-title {
+	font-size: 15px;
+	font-weight: 700;
+}
+.stat {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 14px 16px;
+	background: linear-gradient(var(--lift), var(--lift)), var(--panel);
+}
+.stat-label {
+	font-size: var(--text-xs);
+	color: var(--muted);
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.stat-value {
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
+}
+.stat-hint {
+	font-size: var(--text-xs);
+	color: var(--muted);
+}
+.kicker {
+	font-size: var(--text-xs);
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--accent-deep);
+}
+.kbd {
+	display: inline-block;
+	min-width: 20px;
+	padding: 0 5px;
+	border: 1px solid var(--line);
+	border-bottom-width: 2px;
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+	font-family: var(--font-mono);
+	font-size: var(--text-2xs);
+	line-height: 18px;
+	text-align: center;
+	color: var(--muted);
+}
+.code-chip {
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: var(--surface-sunken);
+	font-family: var(--font-mono);
+	font-size: 0.92em;
+}
+
+/* ---------- chips (status) ---------- */
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 1px 8px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-full);
+	background: var(--surface-sunken);
+	color: var(--muted);
+	font-size: var(--text-2xs);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	line-height: 18px;
+	white-space: nowrap;
+}
+.chip-dot::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: currentColor;
+}
+.chip-ok { background: var(--ok-soft); color: var(--ok); border-color: var(--ok-edge); }
+.chip-warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-edge); }
+.chip-danger { background: var(--danger-soft); color: var(--danger); border-color: var(--danger-edge); }
+.chip-info { background: var(--info-soft); color: var(--info); border-color: var(--info-edge); }
+.chip-think { background: var(--think-soft); color: var(--think); border-color: var(--think-edge); }
+.chip-accent { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--edge); }
+
+/* ---------- callouts ---------- */
+.callout {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	padding: 10px 12px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	background: var(--surface-sunken);
+	font-size: var(--text-sm);
+}
+.callout > svg {
+	flex: none;
+	margin-top: 2px;
+}
+.callout-title {
+	font-weight: 600;
+}
+.callout-ok { background: var(--ok-soft); border-color: var(--ok-edge); }
+.callout-ok > svg, .callout-ok .callout-title { color: var(--ok); }
+.callout-warn { background: var(--warn-soft); border-color: var(--warn-edge); }
+.callout-warn > svg, .callout-warn .callout-title { color: var(--warn); }
+.callout-danger { background: var(--danger-soft); border-color: var(--danger-edge); }
+.callout-danger > svg, .callout-danger .callout-title { color: var(--danger); }
+.callout-info { background: var(--info-soft); border-color: var(--info-edge); }
+.callout-info > svg, .callout-info .callout-title { color: var(--info); }
+
+/* ---------- dialog (native <dialog>, top layer) ---------- */
+.dialog {
+	width: min(480px, calc(100vw - 24px));
+	max-height: min(88vh, 900px);
+	margin: auto;
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-xl);
+	background: var(--panel-strong);
+	color: var(--ink);
+	box-shadow: var(--shadow-modal);
+	overflow: hidden;
+}
+.dialog[open] {
+	display: flex;
+	flex-direction: column;
+}
+.dialog-sm { width: min(400px, calc(100vw - 24px)); }
+.dialog-lg { width: min(680px, calc(100vw - 24px)); }
+.dialog::backdrop {
+	background: var(--overlay);
+}
+.dialog-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 16px 18px 8px;
+}
+.dialog-title {
+	font-size: var(--text-lg);
+	font-weight: 700;
+}
+.dialog-desc {
+	margin-top: 2px;
+	font-size: var(--text-sm);
+	color: var(--muted);
+}
+.dialog-body {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 8px 18px 6px;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	min-height: 0;
+}
+.dialog-foot {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 14px 18px 18px;
+}
+@media (prefers-reduced-motion: no-preference) {
+	.dialog[open] {
+		animation: dialog-in 160ms ease-out;
+	}
+}
+@keyframes dialog-in {
+	from { opacity: 0; translate: 0 6px; }
+}
+
+/* ---------- menu (Popover API) ---------- */
+.menu {
+	position: fixed;
+	inset: auto;
+	margin: 0;
+	min-width: 180px;
+	max-width: calc(100vw - 16px);
+	padding: 4px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	background: var(--panel-strong);
+	color: var(--ink);
+	box-shadow: var(--shadow-pop);
+}
+.menu:popover-open {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+.menu-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 6px 10px;
+	border: 0;
+	border-radius: 7px;
+	background: transparent;
+	color: var(--ink);
+	font: inherit;
+	font-size: var(--text-sm);
+	text-align: left;
+	cursor: pointer;
+}
+.menu-item:hover,
+.menu-item:focus-visible {
+	background: var(--wash);
+	outline: none;
+}
+.menu-item:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.menu-item-danger {
+	color: var(--danger);
+}
+.menu-item-danger:hover,
+.menu-item-danger:focus-visible {
+	background: var(--danger-soft);
+}
+.menu-sep {
+	height: 1px;
+	margin: 4px 2px;
+	background: var(--line);
+}
+
+/* ---------- toasts (popover="manual" → above an open dialog) ---------- */
+.toasts {
+	position: fixed;
+	inset: auto 16px 16px auto;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	overflow: visible;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 8px;
+	width: min(380px, calc(100vw - 32px));
+	pointer-events: none;
+}
+.toast {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	width: 100%;
+	padding: 10px 10px 10px 12px;
+	border: 1px solid var(--line);
+	border-left: 3px solid var(--info);
+	border-radius: var(--radius-md);
+	background: var(--panel-strong);
+	color: var(--ink);
+	box-shadow: var(--shadow-pop);
+	font-size: var(--text-sm);
+	pointer-events: auto;
+}
+.toast > svg {
+	flex: none;
+	margin-top: 2px;
+}
+.toast-ok { border-left-color: var(--ok); }
+.toast-ok > svg { color: var(--ok); }
+.toast-warn { border-left-color: var(--warn); }
+.toast-warn > svg { color: var(--warn); }
+.toast-danger { border-left-color: var(--danger); }
+.toast-danger > svg { color: var(--danger); }
+.toast-info > svg { color: var(--info); }
+@media (prefers-reduced-motion: no-preference) {
+	.toast {
+		animation: toast-in 180ms ease-out;
+	}
+}
+@keyframes toast-in {
+	from { opacity: 0; translate: 0 8px; }
+}
+
+/* ---------- table (EAP recipe: scroll inside a wrapper, never the page) ---------- */
+.table-wrap {
+	/* position: relative is load-bearing — it makes the wrapper the containing block of
+	   absolutely-positioned bits inside (.sr-only headers/captions); without it they escape
+	   the scroll box and the PAGE scrolls sideways on a phone (measured: 685px at 375px). */
+	position: relative;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	background: var(--panel-strong);
+	overflow: hidden;
+}
+@media (max-width: 720px) {
+	.table-wrap {
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+	}
+	.table-wrap > .table {
+		min-width: var(--table-min, 640px);
+	}
+}
+.table {
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
+	font-size: var(--text-sm);
+}
+.table th {
+	padding: 9px 12px;
+	border-bottom: 1px solid var(--line);
+	background: var(--surface-sunken);
+	color: var(--muted);
+	font-size: var(--text-2xs);
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-align: left;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+.table td {
+	padding: 9px 12px;
+	border-bottom: 1px solid var(--line);
+	vertical-align: middle;
+}
+.table tbody tr:last-child > td {
+	border-bottom: 0;
+}
+.table tbody tr:hover > td {
+	background: var(--wash);
+}
+.table tr[data-clickable] {
+	cursor: pointer;
+}
+.table .num,
+.table .align-right {
+	text-align: right;
+}
+.table .clip {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.table-state {
+	padding: 26px 12px !important;
+	text-align: center !important;
+	color: var(--muted);
+}
+
+/* ---------- loading ---------- */
+.spinner {
+	display: inline-block;
+	flex: none;
+	width: 16px;
+	height: 16px;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 50%;
+	opacity: 0.75;
+	animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+	to { rotate: 360deg; }
+}
+.spin {
+	animation: spin 0.8s linear infinite;
+}
+.skeleton {
+	display: block;
+	height: 12px;
+	border-radius: var(--radius-sm);
+	background: linear-gradient(90deg, var(--surface-sunken) 0%, var(--wash) 50%, var(--surface-sunken) 100%);
+	background-size: 200% 100%;
+	animation: shimmer 1.3s ease-in-out infinite;
+}
+@keyframes shimmer {
+	from { background-position: 100% 0; }
+	to { background-position: -100% 0; }
+}
+
+/* ---------- tabs ---------- */
+.tabs {
+	display: flex;
+	gap: 2px;
+	border-bottom: 1px solid var(--line);
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+.tab {
+	position: relative;
+	padding: 8px 12px;
+	border: 0;
+	background: transparent;
+	color: var(--muted);
+	font: inherit;
+	font-size: var(--text-sm);
+	font-weight: 600;
+	white-space: nowrap;
+	cursor: pointer;
+}
+.tab:hover {
+	color: var(--ink);
+}
+.tab[aria-selected='true'] {
+	color: var(--ink);
+}
+.tab[aria-selected='true']::after {
+	content: '';
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	bottom: -1px;
+	height: 2px;
+	border-radius: 2px;
+	background: var(--accent);
+}
+
+/* ---------- radio cards (Settings → Appearance) ---------- */
+.choice {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-md);
+	background: var(--surface);
+	font-size: var(--text-sm);
+	cursor: pointer;
+}
+.choice:hover {
+	border-color: var(--edge);
+}
+.choice:has(input:checked) {
+	border-color: var(--accent);
+	background: var(--accent-soft);
+	color: var(--accent-deep);
+}
+.choice > input {
+	accent-color: var(--accent);
+	margin: 0;
+}
+
+/* ---------- brand mark ---------- */
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+	font-weight: 700;
+	text-decoration: none;
+	color: var(--ink);
+}
+.brand-mark {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 28px;
+	height: 28px;
+	border-radius: var(--radius);
+	background: var(--accent);
+	color: var(--on-accent);
+}
+.brand-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* ========== SHELLS ========== */
+
+/* Console: sticky grouped side nav + content column.
+   `min-width: 0` on the main column is LOAD-BEARING: without it a wide table pushes the
+   whole page sideways (EAP, measured). */
+.console {
+	display: grid;
+	grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+	min-height: 100vh;
+}
+.console-side {
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 14px 10px;
+	border-right: 1px solid var(--line);
+	background: var(--panel);
+	overflow-y: auto;
+}
+.console-side .brand {
+	padding: 4px 8px 14px;
+	font-size: var(--text-base);
+}
+.nav-group {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+.nav-group-label {
+	padding: 12px 10px 4px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--faint);
+	user-select: none;
+}
+.nav-link {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 7px 10px;
+	border-radius: var(--radius);
+	color: var(--muted);
+	font-size: var(--text-sm);
+	font-weight: 500;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.nav-link:hover {
+	background: var(--wash);
+	color: var(--ink);
+}
+.nav-link.active {
+	background: var(--accent-soft);
+	color: var(--accent-deep);
+	font-weight: 600;
+}
+.nav-spacer {
+	flex: 1;
+	min-height: 12px;
+}
+.console-main {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+.topbar {
+	position: sticky;
+	top: 0;
+	z-index: var(--z-sticky);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	height: var(--topbar-h);
+	padding: 0 22px;
+	border-bottom: 1px solid var(--line);
+	background: var(--panel);
+	backdrop-filter: blur(8px);
+}
+.topbar-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+.crumbs {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	font-size: var(--text-sm);
+	color: var(--muted);
+	white-space: nowrap;
+}
+.crumbs a {
+	text-decoration: none;
+}
+.crumbs a:hover {
+	color: var(--ink);
+}
+.crumbs [aria-current] {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--ink);
+	font-weight: 600;
+}
+.topbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: none;
+}
+.console-content {
+	width: 100%;
+	max-width: var(--content-max);
+	padding: 22px;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+.drawer-toggle,
+.drawer-scrim {
+	display: none;
+}
+
+/* Below 900px the side nav becomes an off-canvas drawer (EAP's wrapped pills got long).
+   `visibility` makes the closed drawer unreachable by Tab without JS. */
+@media (max-width: 900px) {
+	.console {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.console-side {
+		position: fixed;
+		inset: 0 auto 0 0;
+		z-index: var(--z-drawer);
+		width: min(280px, 84vw);
+		height: 100%;
+		background: var(--panel-strong);
+		box-shadow: var(--shadow-modal);
+		translate: -102% 0;
+		visibility: hidden;
+		transition: translate 200ms ease, visibility 0s linear 200ms;
+	}
+	.console[data-drawer='open'] .console-side {
+		translate: 0 0;
+		visibility: visible;
+		transition: translate 200ms ease;
+	}
+	.drawer-toggle {
+		display: inline-flex;
+	}
+	.console[data-drawer='open'] .drawer-scrim {
+		display: block;
+		position: fixed;
+		inset: 0;
+		z-index: calc(var(--z-drawer) - 1);
+		background: var(--overlay);
+	}
+	.topbar {
+		padding: 0 12px;
+	}
+	.console-content {
+		padding: 16px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.console-side {
+		transition: none !important;
+	}
+}
+
+/* Public site */
+.public {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+.public-container {
+	width: 100%;
+	max-width: var(--content-max);
+	margin: 0 auto;
+	padding-inline: 20px; /* inline only: header/footer set their own block padding */
+}
+.public-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding-top: 18px;
+	padding-bottom: 18px;
+}
+.public-main {
+	flex: 1;
+}
+.public-footer {
+	padding-top: 22px;
+	padding-bottom: 28px;
+	border-top: 1px solid var(--line);
+	color: var(--muted);
+	font-size: var(--text-xs);
+}
+@media (max-width: 640px) {
+	.public-container {
+		padding-inline: 16px;
+	}
+}
+
+/* Auth card */
+.auth {
+	display: grid;
+	place-items: center;
+	min-height: 100vh;
+	padding: 24px 16px;
+}
+.auth-card {
+	width: 100%;
+	max-width: 400px;
+	padding: 28px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	background: var(--panel-strong);
+	box-shadow: var(--shadow-modal);
+}
+.auth-corner {
+	position: fixed;
+	top: 14px;
+	right: 14px;
+}
+@media (max-width: 480px) {
+	.auth-card {
+		padding: 22px 18px;
+	}
+}

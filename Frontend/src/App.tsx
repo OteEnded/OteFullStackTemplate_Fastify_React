@@ -1,42 +1,44 @@
-import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import ExampleItemsPage from './pages/ExampleItemsPage'; // @demo
-import './index.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AuthProvider } from './auth/AuthProvider'
+import { ConsoleLayout } from './components/shell/ConsoleLayout'
+import { PublicLayout } from './components/shell/PublicLayout'
+import { Toaster } from './components/ui/Toaster'
+import { lazyWithReload } from './lib/lazyWithReload'
+import LandingPage from './pages/LandingPage'
+import LoginPage from './pages/LoginPage'
+import NotFoundPage from './pages/NotFoundPage'
+
+// Routes:
+//   /            public page (PublicLayout)          /login   sign-in card (AuthLayout)
+//   /console/*   the console (ConsoleLayout) — open without signing in until Slice 8's auth
+// Console pages are code-split; lazyWithReload recovers from stale chunks after a redeploy.
+
+const DashboardPage = lazyWithReload(() => import('./pages/DashboardPage'))
+const SettingsPage = lazyWithReload(() => import('./pages/SettingsPage'))
+const ItemsPage = lazyWithReload(() => import('./features/template-items/ItemsPage')) // @demo
+// Dev-only kit: `import.meta.env.DEV` is false in a build, so the chunk isn't even emitted.
+const KitchenSinkPage = import.meta.env.DEV ? lazyWithReload(() => import('./pages/KitchenSinkPage')) : null
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <main className="app-shell">
-        <div className="app-glow app-glow-left" aria-hidden="true" />
-        <div className="app-glow app-glow-right" aria-hidden="true" />
-
-        <section className="app-frame">
-          <header className="hero">
-            <p className="hero-kicker">Fastify + React Starter</p>
-            <h1>Reusable Full-Stack Template</h1>
-            <p className="hero-copy">
-              A generic baseline with Fastify serving the built React app, optional Sequelize setup,
-              and one small example feature to replace with your real domain.
-            </p>
-          </header>
-
-          <nav className="app-nav" aria-label="Primary">
-            <NavLink to="/" end className={({ isActive }) => isActive ? 'app-nav-link active' : 'app-nav-link'}>
-              Overview
-            </NavLink>
-            {/* @demo-start */}
-            <NavLink to="/items" className={({ isActive }) => isActive ? 'app-nav-link active' : 'app-nav-link'}>
-              Example Items
-            </NavLink>
-            {/* @demo-end */}
-          </nav>
-
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/items" element={<ExampleItemsPage />} /> {/* @demo */}
-          </Routes>
-        </section>
-      </main>
-    </BrowserRouter>
-  );
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<PublicLayout />}>
+            <Route index element={<LandingPage />} />
+          </Route>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/console" element={<ConsoleLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="items" element={<ItemsPage />} /> {/* @demo */}
+            <Route path="settings" element={<SettingsPage />} />
+            {KitchenSinkPage && <Route path="ui" element={<KitchenSinkPage />} />}
+            <Route path="*" element={<NotFoundPage inConsole />} />
+          </Route>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
+      <Toaster />
+    </AuthProvider>
+  )
 }

@@ -1,0 +1,156 @@
+/* ===== Theme tokens — THE ONLY FILE WITH COLOUR VALUES =====
+   One semantic palette, two value sets (lifted from EAP src/index.css; OSM's light status
+   *-soft values adopted — they read better on cream). Everything else — Tailwind utilities
+   (mapped in index.css `@theme inline`) and the hand-written CSS — styles through these
+   variables. A hex anywhere else in src/ is a bug: it will only look right in one theme.
+   Naming: *-soft = subtle background · *-edge = border · bare name = ink/strong.
+
+   DARK is the default set (`:root`): it is what paints if the boot script never runs
+   (Ote: never flash-bang). index.html mirrors the two --bg values in its pre-paint <style>. */
+
+:root,
+html[data-theme='dark'] {
+	color-scheme: dark;
+
+	/* surfaces */
+	--bg: #171310;
+	--bg-top: #1d1815;
+	--panel: rgba(34, 28, 22, 0.88);
+	--panel-strong: #241e18;
+	--surface: #2b241d; /* inputs, buttons, cards-on-panel */
+	--surface-sunken: rgba(255, 255, 255, 0.09); /* table heads, inline code, tracks */
+	--code-bg: var(--surface-sunken); /* alias kept for one release so EAP pages paste in */
+	--overlay: rgba(0, 0, 0, 0.62); /* dialog backdrop */
+	--lift: rgba(255, 255, 255, 0.045); /* translucent raise on panels (stat cards) */
+
+	/* text */
+	--ink: #ece5d8;
+	--muted: #a89d8d;
+	--faint: #7d7366; /* placeholders, disabled */
+	--on-accent: #1a120c; /* text on a solid --accent fill */
+
+	/* lines */
+	--line: #3b332a;
+	--line-strong: #574b3e;
+	--edge: rgba(238, 196, 159, 0.24); /* accent-tinted border */
+
+	/* accent */
+	--accent: #d97e4f;
+	--accent-soft: #3d2517;
+	--accent-deep: #eec49f; /* accent INK flips light so text stays readable */
+	--wash: rgba(238, 196, 159, 0.08); /* faint accent tint (hovers) */
+	--focus: #e69a6f;
+
+	/* status */
+	--ok: #86d0a5;
+	--ok-soft: #1f342a;
+	--ok-edge: #3d5c4a;
+	--warn: #e5c26b;
+	--warn-soft: #372d15;
+	--warn-edge: #6a5822;
+	--danger: #ff9184;
+	--danger-soft: #3a201c;
+	--danger-edge: #7a413a;
+	--info: #85c2ea;
+	--info-soft: #1d2d3a;
+	--info-edge: #38536b;
+	--think: #bfaef0;
+	--think-soft: #2b2438;
+	--think-edge: #4c4166;
+
+	/* charts — categorical, fixed slot order (EAP validated set, re-stepped for dark) */
+	--series-1: #3987e5;
+	--series-2: #d95926;
+	--series-3: #199e70;
+	--series-4: #c98500;
+	--series-5: #d55181;
+	--series-6: #008300;
+	--series-7: #9085e9;
+	--series-8: #e66767;
+
+	/* backdrop — the soft corner glows (Ote U1) */
+	--bg-glow-a: rgba(96, 52, 30, 0.35);
+	--bg-glow-b: rgba(34, 66, 50, 0.28);
+	--app-glow-left: #4a2c1a;
+	--app-glow-right: #21382c;
+
+	/* elevation colour (the shadow scale lives in index.css @theme) */
+	--shadow: rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme='light'] {
+	color-scheme: light;
+
+	--bg: #f3efe7;
+	--bg-top: #f7f2ea;
+	--panel: rgba(255, 251, 244, 0.88);
+	--panel-strong: #fffaf0;
+	--surface: #ffffff;
+	--surface-sunken: rgba(0, 0, 0, 0.055);
+	--overlay: rgba(31, 36, 48, 0.4);
+	--lift: rgba(255, 255, 255, 0.55);
+
+	--ink: #1f2430;
+	--muted: #5a6171;
+	--faint: #858a96;
+	--on-accent: #ffffff;
+
+	--line: #d7cfbf;
+	--line-strong: #bdb29e;
+	--edge: rgba(125, 49, 21, 0.22);
+
+	--accent: #bf5b31;
+	--accent-soft: #f7dccf;
+	--accent-deep: #7d3115;
+	--wash: rgba(125, 49, 21, 0.07);
+	--focus: #bf5b31;
+
+	--ok: #2c6e49;
+	--ok-soft: #dcf0e4;
+	--ok-edge: #b5d6c1;
+	--warn: #85600c;
+	--warn-soft: #fbefd2;
+	--warn-edge: #e8d29b;
+	--danger: #a02020;
+	--danger-soft: #fbe4e1;
+	--danger-edge: #efbcb6;
+	--info: #2b6a99;
+	--info-soft: #dcecf7;
+	--info-edge: #bcd7ec;
+	--think: #5b4b86;
+	--think-soft: #e7e3f7;
+	--think-edge: #d0c6e8;
+
+	--series-1: #2a78d6;
+	--series-2: #eb6834;
+	--series-3: #1baf7a;
+	--series-4: #eda100;
+	--series-5: #e87ba4;
+	--series-6: #008300;
+	--series-7: #4a3aa7;
+	--series-8: #e34948;
+
+	--bg-glow-a: rgba(247, 220, 207, 0.95);
+	--bg-glow-b: rgba(217, 234, 223, 0.9);
+	--app-glow-left: #f0bba1;
+	--app-glow-right: #bfd8ca;
+
+	--shadow: rgba(65, 34, 13, 0.12);
+}
+
+/* Theme-independent tokens. */
+:root {
+	/* ONE place to swap the Thai face (Ote U4: Noto Sans Thai for now). */
+	--font-thai: 'Noto Sans Thai';
+	--leading: 1.55; /* Thai-safe: stacked vowels + tone marks need >= 1.5 */
+
+	/* layout */
+	--sidebar-w: 212px;
+	--content-max: 1120px;
+	--topbar-h: 56px;
+
+	/* z (dialogs, menus and toasts use the top layer — no z needed there) */
+	--z-sticky: 10;
+	--z-drawer: 40;
+	--z-toast: 90;
+}

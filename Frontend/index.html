@@ -1,12 +1,84 @@
 <!doctype html>
-<html lang="en">
+<!-- data-theme="dark" is the fallback when JavaScript is blocked or slow: never flash-bang (Ote). -->
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ote FullStack Template</title>
+    <title>Console</title>
+    <meta name="theme-color" content="#171310" />
+    <script>
+      // Theme boot — runs BEFORE the stylesheet so the first paint is already themed.
+      // Preference: 'light' | 'dark' | 'system', stored under the shared key `ote:theme`
+      // (src/lib/theme.ts writes it). A first visit follows the device ('system'); if the
+      // device can't be asked, it boots DARK — "so it not flash bang the user" (Ote).
+      (function () {
+        var pref = null;
+        try { pref = localStorage.getItem('ote:theme'); } catch (e) { /* storage blocked */ }
+        if (pref !== 'light' && pref !== 'dark' && pref !== 'system') pref = 'system';
+        var light = false;
+        try { light = pref === 'light' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches); } catch (e) { /* no matchMedia: stay dark */ }
+        var theme = light ? 'light' : 'dark';
+        document.documentElement.dataset.theme = theme;
+        try { document.querySelector('meta[name="theme-color"]').setAttribute('content', light ? '#f3efe7' : '#171310'); } catch (e) { /* ignore */ }
+      })();
+    </script>
+    <style>
+      /* Pre-stylesheet paint. These two values MIRROR --bg in src/styles/tokens.css
+         (dark #171310, light #f3efe7) — keep them in sync; test/ui checks they match. */
+      html[data-theme='dark'] { background: #171310; color-scheme: dark; }
+      html[data-theme='light'] { background: #f3efe7; color-scheme: light; }
+    </style>
+    <script>
+      // Boot watchdog — the outermost guard against a blank page, for when the app never
+      // MOUNTS (main bundle 404 after a redeploy, a stalled boot). It runs even if the module
+      // bundle fails to load, unlike the React error boundary, and stays out of the way once
+      // the app has mounted: a route chunk failing later is lazyWithReload's job (own guard),
+      // so the two never stack into a reload loop. (Lifted from EAP index.html.)
+      (function () {
+        var GUARD = 'ote:boot-reloaded';
+        var mounted = function () { var r = document.getElementById('root'); return !!r && r.childElementCount > 0; };
+        function removeCard() { var el = document.getElementById('boot-fallback'); if (el && el.parentNode) el.parentNode.removeChild(el); }
+        function showCard() {
+          if (mounted() || document.getElementById('boot-fallback')) return;
+          var dark = document.documentElement.dataset.theme !== 'light';
+          var el = document.createElement('div');
+          el.id = 'boot-fallback';
+          el.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:' + (dark ? '#ece5d8' : '#1f2430');
+          el.innerHTML =
+            '<div style="font-size:15px;font-weight:600">This page didn’t finish loading</div>' +
+            '<div style="font-size:13px;opacity:.75;max-width:340px">A network hiccup or an app update can cause this. Reloading usually fixes it.</div>' +
+            '<button id="boot-reload" style="cursor:pointer;border:0;background:' + (dark ? '#d97e4f;color:#1a120c' : '#bf5b31;color:#fff') + ';font-size:14px;font-weight:600;padding:9px 20px;border-radius:8px">Reload</button>';
+          document.body.appendChild(el);
+          document.getElementById('boot-reload').addEventListener('click', function () {
+            try { sessionStorage.removeItem(GUARD); } catch (e) { /* storage blocked */ }
+            location.reload();
+          });
+        }
+        var poll = setInterval(function () {
+          if (mounted()) { clearInterval(poll); clearTimeout(timer); removeCard(); try { sessionStorage.removeItem(GUARD); } catch (e) {} }
+        }, 250);
+        // The MAIN bundle failed to load and nothing mounted → reload once for a fresh
+        // index.html; if we already did, show the card instead of looping.
+        window.addEventListener('error', function (e) {
+          var t = e && e.target;
+          if (!t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return;
+          setTimeout(function () {
+            if (mounted()) return;
+            try {
+              if (sessionStorage.getItem(GUARD) !== '1') { sessionStorage.setItem(GUARD, '1'); location.reload(); return; }
+            } catch (e2) { /* storage blocked */ }
+            showCard();
+          }, 800);
+        }, true);
+        // Silent-hang safety net: still blank after 12 s → offer a reload (don't force one;
+        // a slow link may still be loading).
+        var timer = setTimeout(showCard, 12000);
+      })();
+    </script>
   </head>
   <body>
+    <noscript><p style="padding:24px;font-family:system-ui,sans-serif">This console needs JavaScript.</p></noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
