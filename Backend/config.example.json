@@ -36,28 +36,24 @@
             "log_file_postfix": "",
             "log_to_file": true,
             "log_to_console": false
-        }
+        },
+        "retention_days": 30
     },
     "database": {
         "enabled": false,
-        "sync": {
-            "force": false,
-            "alter": false
-        },
-        "seed": {
-            "force_template_items_sync": false
-        },
+        "schema_mode": "migrate",
         "connection": {
+            "dialect": "postgres",
+            "host": "127.0.0.1",
+            "port": 5432,
+            "database": "",
             "username": "",
             "password": "",
-            "database": "",
             "schemas": {
                 "parent": "public",
                 "project": ""
             },
-            "host": "127.0.0.1",
-            "port": 5432,
-            "dialect": "postgres"
+            "storage": "./data/app.sqlite"
         }
     },
     "_comments": {
@@ -69,6 +65,11 @@
         "app.trust_proxy": "false, or the reverse proxy's address / hop count (e.g. \"127.0.0.1\" or 1) so request.ip is the real visitor. Never true.",
         "app.body_limit_mb": "Largest accepted request body in megabytes (Fastify default is 1).",
         "logging.request": "log_headers / log_query / log_body add request content to the request log — off by default; secrets are redacted even when on.",
-        "database.enabled": "false = no database: the app still runs; DB-backed routes answer 503 db_disabled."
+        "logging.retention_days": "Delete log files and log_* rows older than this many days (daily at 03:15 and at startup). 0 = keep forever.",
+        "database.enabled": "false = no database: the app still runs; DB-backed routes answer 503 db_disabled.",
+        "database.schema_mode": "migrate (default, Postgres) = the SQL files in database/migrations/ own the schema; run `npm run db:migrate` before starting — the server refuses to start with pending migrations. sync = models create missing tables (prototypes, SQLite, other dialects); never alters.",
+        "database.connection.dialect": "postgres (first-class) · mysql · mariadb · mssql · sqlite. Each needs its driver installed in Backend: pg (included) · mysql2 · mariadb · tedious · sqlite3 (native module: a SQLite project can't become a portable EXE).",
+        "database.connection.schemas.project": "Postgres: this app's own schema (one database, one schema per app). Tests use <project>_test. Ignored by other dialects.",
+        "database.connection.storage": "SQLite only: the database file, relative to Backend/."
     }
 }

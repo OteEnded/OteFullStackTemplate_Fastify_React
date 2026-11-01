@@ -1,6 +1,9 @@
+// log_requests — append-only request log (app/plugins/request-logger.js with log_to_database on).
+// ONE name end to end: file, define(), tableName and the db.log_requests accessor.
+// The table itself is authored by database/migrations/001_log_tables.sql; this model mirrors it.
 export default (sequelize, DataTypes, schemas, choices, hooks) => {
     return sequelize.define(
-        "LogRequests",
+        "log_requests",
         {
             uuid: {
                 type: DataTypes.UUID,
@@ -13,32 +16,32 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 autoIncrement: true,
                 allowNull: false,
                 unique: true,
-                comment: "Auto-incrementing unique identifier for each log request",
+                comment: "Auto-incrementing secondary key (a good index; not the primary key)",
             },
             request_at: {
                 type: DataTypes.DATE,
                 allowNull: false,
-                comment: "Timestamp when the request was made",
+                comment: "Timestamp when the request was received",
             },
             request_ip: {
                 type: DataTypes.STRING,
                 allowNull: true,
-                comment: "IP address from which the request originated",
+                comment: "Client IP (the real visitor only when app.trust_proxy is set behind a proxy)",
             },
             request_to: {
-                type: DataTypes.STRING,
+                type: DataTypes.TEXT,
                 allowNull: false,
-                comment: "Endpoint or URL to which the request was made",
+                comment: "Path (+ redacted query when logging.request.log_query is on)",
             },
             request_protocol: {
                 type: DataTypes.STRING,
                 allowNull: true,
-                comment: "Protocol used for the request (e.g., HTTP/1.1, HTTP/2)",
+                comment: "http or https",
             },
             request_method: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                comment: "HTTP method used for the request (e.g., GET, POST, PUT, DELETE)",
+                comment: "HTTP method (GET/POST — the API is GET + POST only)",
             },
             response_status: {
                 type: DataTypes.INTEGER,
@@ -51,25 +54,23 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 comment: "Time from request received to response sent, in milliseconds",
             },
             request_header: {
-                type: DataTypes.JSONB,
+                type: DataTypes.JSON,
                 allowNull: true,
                 comment: "Request headers, REDACTED (only when logging.request.log_headers is on)",
             },
             request_body: {
-                type: DataTypes.JSONB,
+                type: DataTypes.JSON,
                 allowNull: true,
                 comment: "Parsed request body, REDACTED (only when logging.request.log_body is on)",
             },
         },
         {
             tableName: "log_requests",
-            // Append-only: created_at only. Mapped explicitly — turning timestamps
-            // on without the snake_case mapping broke every log write in OLS.
-            timestamps: true,
+            timestamps: true, // append-only: created_at only (see log_messages.model.js)
             createdAt: "created_at",
             updatedAt: false,
             schema: schemas.project,
-            hooks: hooks?.logRequest || {}
+            hooks: hooks?.log_requests || {},
         },
     );
 };

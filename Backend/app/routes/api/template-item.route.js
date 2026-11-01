@@ -8,29 +8,29 @@ import { CHOICES } from '../../../database/models/index.js'
 //   - every reply is { ok:true, data } or { ok:false, message, code }
 
 function ensureTemplateItemsModel(fastify, reply) {
-  if (!fastify.db?.TemplateItems) {
+  if (!fastify.db?.mst_template_items) {
     reply.code(503).send({
       ok: false,
-      message: 'TemplateItems model is unavailable. Enable and configure the database in config.json.',
+      message: 'The demo table is unavailable. Enable and configure the database in config.json.',
       code: 'db_disabled',
     })
     return null
   }
 
-  return fastify.db.TemplateItems
+  return fastify.db.mst_template_items
 }
 
 const itemFields = {
   name: { type: 'string', minLength: 1, maxLength: 200 },
   summary: { type: 'string', maxLength: 5000 },
-  status: { type: 'string', enum: CHOICES.template_item_status },
-  priority: { type: 'string', enum: CHOICES.template_item_priority },
+  status: { type: 'string', enum: CHOICES.mst_template_items_status },
+  priority: { type: 'string', enum: CHOICES.mst_template_items_priority },
 }
 
 const listQuery = {
   type: 'object',
   properties: {
-    status: { type: 'string', enum: CHOICES.template_item_status },
+    status: { type: 'string', enum: CHOICES.mst_template_items_status },
     limit: { type: 'integer', minimum: 1, maximum: 200, default: 50 },
   },
 }

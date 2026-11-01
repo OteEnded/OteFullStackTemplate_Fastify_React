@@ -279,9 +279,9 @@ export async function log(message, level = "info", importMetaUrl) {
     }
 
     if (options.logToDatabase) {
-        if (db?.LogMessages) {
+        if (db?.log_messages) {
             try {
-                await db.LogMessages.create({
+                await db.log_messages.create({
                     server_start_on: serverStartOn,
                     report_by: relPath,
                     report_on: reportOn,
@@ -329,12 +329,12 @@ export function setDB(db_from_plugin_init) {
     // Flush pending message logs
     if (
         messageOptions.logToDatabase &&
-        db?.LogMessages &&
+        db?.log_messages &&
         pendingLogRows.length > 0
     ) {
         const rowsToInsert = pendingLogRows.splice(0, pendingLogRows.length);
         Promise.all(
-            rowsToInsert.map((row) => db.LogMessages.create(row)),
+            rowsToInsert.map((row) => db.log_messages.create(row)),
         ).catch((err) => {
             console.error(
                 "Error flushing pending message logs to database:",
@@ -348,7 +348,7 @@ export function setDB(db_from_plugin_init) {
     // Flush pending request logs
     if (
         requestOptions.logToDatabase &&
-        db?.LogRequests &&
+        db?.log_requests &&
         pendingRequestLogRows.length > 0
     ) {
         const rowsToInsert = pendingRequestLogRows.splice(
@@ -356,7 +356,7 @@ export function setDB(db_from_plugin_init) {
             pendingRequestLogRows.length,
         );
         Promise.all(
-            rowsToInsert.map((row) => db.LogRequests.create(row)),
+            rowsToInsert.map((row) => db.log_requests.create(row)),
         ).catch((err) => {
             console.error(
                 "Error flushing pending request logs to database:",
@@ -433,9 +433,9 @@ export async function logRequest(requestData) {
     }
 
     if (options.logToDatabase) {
-        if (db?.LogRequests) {
+        if (db?.log_requests) {
             try {
-                await db.LogRequests.create(requestData);
+                await db.log_requests.create(requestData);
             } catch (err) {
                 console.error("Error writing request log to database:", err);
             }
@@ -482,14 +482,18 @@ class CronManager {
         const cronOptions = { ...options };
         delete cronOptions.context; // Remove context from cron options
 
-        const wrappedTask = options.isLog
-            ? async () => {
-                await log(`Running cron job ${name} (cron: "${schedule}")`, "info", import.meta.url);
+        // Every job is GUARDED: a job that throws is logged and the server keeps
+        // running (an unhandled rejection exits the process — see server.js).
+        const wrappedTask = async () => {
+            try {
+                if (options.isLog) {
+                    await log(`Running cron job ${name} (cron: "${schedule}")`, "info", import.meta.url);
+                }
                 await task(context);
+            } catch (err) {
+                await log(`Cron job ${name} failed: ${err?.stack || err}`, "error", import.meta.url);
             }
-            : async () => {
-                await task(context);
-            };
+        };
 
         const job = cron.createTask(schedule, wrappedTask, {
             name,

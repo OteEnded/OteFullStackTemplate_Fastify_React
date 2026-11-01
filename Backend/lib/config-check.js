@@ -4,6 +4,8 @@
 //
 // Add a check here whenever a value would make the app unsafe or silently broken.
 
+import { getDbConfig } from "./db-config.js";
+
 const PLACEHOLDER = /CHANGE_ME/i;
 
 function walk(value, path, visit) {
@@ -68,14 +70,12 @@ export function checkConfig(config) {
         problems.push(`app.body_limit_mb must be a positive number (megabytes)`);
     }
 
-    const db = config?.database ?? {};
-    if (db.enabled !== false) {
-        const conn = db.connection ?? {};
-        for (const key of ["host", "database", "username", "dialect"]) {
-            if (!conn[key]) problems.push(`database.connection.${key} is empty (database.enabled is on)`);
-        }
-        if (conn.dialect === "postgres" && !conn.schemas?.project) {
-            problems.push(`database.connection.schemas.project is empty — every app gets its own Postgres schema`);
+    // Database settings: the same rules the DB layer itself enforces (lib/db-config.js).
+    if (config?.database?.enabled !== false) {
+        try {
+            getDbConfig(config);
+        } catch (err) {
+            problems.push(...(err.problems ?? [err.message]).map((p) => `${p} (database.enabled is on)`));
         }
     }
 

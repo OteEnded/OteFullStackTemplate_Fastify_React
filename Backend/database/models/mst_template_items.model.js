@@ -1,6 +1,10 @@
+// mst_template_items — the DEMO feature's table (mst_ = master data: what exists).
+// Replace it with your own domain; the wizard can delete the whole demo chain.
+// ONE name end to end: file, define(), tableName and the db.mst_template_items accessor.
+// The table itself is authored by database/migrations/002_demo_template_items.sql; this model mirrors it.
 export default (sequelize, DataTypes, schemas, choices, hooks) => {
     return sequelize.define(
-        "TemplateItems",
+        "mst_template_items",
         {
             uuid: {
                 type: DataTypes.UUID,
@@ -17,7 +21,7 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 comment: "Auto-incrementing secondary key (a good index; not the primary key)",
             },
             name: {
-                type: DataTypes.STRING,
+                type: DataTypes.STRING(200),
                 allowNull: false,
             },
             summary: {
@@ -26,29 +30,25 @@ export default (sequelize, DataTypes, schemas, choices, hooks) => {
                 defaultValue: "",
             },
             status: {
-                type: DataTypes.STRING,
+                type: DataTypes.STRING(20),
                 allowNull: false,
                 defaultValue: "draft",
-                validate: {
-                    isIn: [choices.template_item_status],
-                },
+                validate: { isIn: [choices.mst_template_items_status] },
             },
             priority: {
-                type: DataTypes.STRING,
+                type: DataTypes.STRING(20),
                 allowNull: false,
                 defaultValue: "medium",
-                validate: {
-                    isIn: [choices.template_item_priority],
-                },
+                validate: { isIn: [choices.mst_template_items_priority] },
             },
         },
         {
-            tableName: "template_items",
+            tableName: "mst_template_items",
             timestamps: true,
             createdAt: "created_at",
             updatedAt: "updated_at",
             schema: schemas.project,
-            hooks: hooks?.templateItem || {},
+            hooks: hooks?.mst_template_items || {},
         },
     );
 };

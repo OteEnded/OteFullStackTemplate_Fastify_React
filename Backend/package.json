@@ -13,7 +13,10 @@
     "test": "node ../test/pipeline/test-all.mjs",
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "db:reset-seed": "node database/scripts/reset_and_seed_mock_data.js"
+    "db:migrate": "node database/migrate.js",
+    "db:status": "node database/migrate.js --status",
+    "db:seed": "node database/seed.js",
+    "db:reset-demo": "node database/seed.js --reset"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.1",

@@ -23,7 +23,7 @@ const TEMPLATE_ITEMS = [
 ];
 
 export default async function seedTemplateItems(db, options = {}) {
-    if (!db?.TemplateItems) {
+    if (!db?.mst_template_items) {
         return;
     }
 
@@ -31,7 +31,7 @@ export default async function seedTemplateItems(db, options = {}) {
 
     if (forceSync) {
         const keepNames = TEMPLATE_ITEMS.map((item) => item.name);
-        const removedRows = await db.TemplateItems.destroy({
+        const removedRows = await db.mst_template_items.destroy({
             where: {
                 name: {
                     [Op.notIn]: keepNames,
@@ -40,11 +40,11 @@ export default async function seedTemplateItems(db, options = {}) {
         });
 
         for (const item of TEMPLATE_ITEMS) {
-            const existing = await db.TemplateItems.findOne({ where: { name: item.name } });
+            const existing = await db.mst_template_items.findOne({ where: { name: item.name } });
             if (existing) {
                 await existing.update(item);
             } else {
-                await db.TemplateItems.create(item);
+                await db.mst_template_items.create(item);
             }
         }
 
@@ -53,9 +53,9 @@ export default async function seedTemplateItems(db, options = {}) {
     }
 
     for (const item of TEMPLATE_ITEMS) {
-        const existing = await db.TemplateItems.findOne({ where: { name: item.name } });
+        const existing = await db.mst_template_items.findOne({ where: { name: item.name } });
         if (!existing) {
-            await db.TemplateItems.create(item);
+            await db.mst_template_items.create(item);
         }
     }
 
