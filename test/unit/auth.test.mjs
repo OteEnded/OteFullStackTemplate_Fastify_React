@@ -75,7 +75,10 @@ test("guarded routes: 401 without a session, through with one; root passes any p
 
 test("a tampered or expired cookie is no session", async () => {
     const cookie = cookieFrom(await login("root", "correct horse")).value;
-    const tampered = cookie.slice(0, -3) + (cookie.endsWith("AAA") ? "BBB" : "AAA");
+    const [v, iv, body, tag] = cookie.split(".");
+    const bytes = Buffer.from(body, "base64url");
+    bytes[0] ^= 0xff; // flip a real ciphertext byte
+    const tampered = [v, iv, bytes.toString("base64url"), tag].join(".");
     const me1 = (await app.inject({ method: "GET", url: "/api/auth/me", cookies: { [COOKIE]: tampered } })).json();
     assert.equal(me1.data.user, null);
 
@@ -123,7 +126,12 @@ test("crypto-box: round-trips, rejects tampering and a key for another purpose, 
     const box = makeBox(SECRET, "a");
     const token = box.seal({ apiKey: "k-123" });
     assert.deepEqual(box.open(token), { apiKey: "k-123" });
-    assert.equal(box.open(token.replace(/.$/, (c) => (c === "A" ? "B" : "A"))), null);
+    // Flip a real BYTE of the ciphertext (editing the last base64url char can touch only padding
+    // bits that decode to the same bytes — a flaky "tamper" that sometimes changes nothing).
+    const [v, iv, body, tag] = token.split(".");
+    const bytes = Buffer.from(body, "base64url");
+    bytes[0] ^= 0xff;
+    assert.equal(box.open([v, iv, bytes.toString("base64url"), tag].join(".")), null);
     assert.equal(makeBox(SECRET, "b").open(token), null);
     assert.throws(() => makeBox("short"), /at least 32/);
 });
