@@ -1,0 +1,20 @@
+{
+    "database": {
+        "connection": {
+            "username": "",
+            "password": "",
+            "database": "",
+            "schemas": {
+                "parent": "public",
+                "project": "my_app"
+            },
+            "host": "127.0.0.1",
+            "port": 5432,
+            "dialect": "postgres"
+        }
+    },
+    "_comments": {
+        "what": "Copy to test.config.json (gitignored) to enable checks/database.check.mjs. Without it, DB checks are SKIPPED, not failed.",
+        "schema": "Tests create and DROP the schema \"<project>_test\" (here my_app_test) — never your real schema. Use a non-superuser test account."
+    }
+}

@@ -10,7 +10,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node ../test/pipeline/test-all.mjs",
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:reset-seed": "node database/scripts/reset_and_seed_mock_data.js"
