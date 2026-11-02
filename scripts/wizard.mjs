@@ -182,21 +182,30 @@ async function main() {
         writeJson(configFile, config);
         say(`Wrote Backend/config.json${generated ? ` (${generated} secret(s) generated)` : ""}`);
 
-        // Name the frontend and the packages after the app.
+        // Frontend runtime config — generated per machine (gitignored), like Backend/config.json.
         const feConfigFile = path.join(FRONTEND, "public", "config.json");
-        const feConfig = fs.existsSync(feConfigFile) ? readJson(feConfigFile) : { app: {}, api: { base_url: "" } };
+        const feExample = path.join(FRONTEND, "config.example.json");
+        const feConfig = fs.existsSync(feExample) ? readJson(feExample) : { app: {}, api: { base_url: "" } };
         feConfig.app = { ...feConfig.app, name };
         writeJson(feConfigFile, feConfig);
+
+        // Package names: a ONE-TIME project setup, only while they still carry the template's names.
+        // On a server clone of your project they're already yours, so the wizard changes no tracked
+        // file there — a deploy's `git pull` must never meet local changes (found on Linux, 2026-11-02).
+        const renamed = [];
         for (const [dir, suffix] of [[BACKEND, "backend"], [FRONTEND, "frontend"], [path.join(ROOT, "test"), "test"]]) {
             const pkgFile = path.join(dir, "package.json");
             if (!fs.existsSync(pkgFile)) continue;
             const pkg = readJson(pkgFile);
+            if (!String(pkg.name).startsWith("fullstack-template-")) continue;
             pkg.name = `${slug}-${suffix}`;
             pkg.version = "0.1.0";
             if (suffix === "backend") pkg.description = `Backend for ${name}`;
-            writeJson(pkgFile, pkg);
+            fs.writeFileSync(pkgFile, `${JSON.stringify(pkg, null, 2)}\n`); // package.json keeps npm's 2-space style
+            renamed.push(path.relative(ROOT, pkgFile).replace(/\\/g, "/"));
         }
-        say(`Named the app "${name}" (frontend config + package names)`);
+        say(`Named the app "${name}"`);
+        if (renamed.length) say(`Renamed the packages (${renamed.join(", ")}) — commit that once, as part of your project's first commits.`);
     }
 
     // --- demo ---

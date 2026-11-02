@@ -16,6 +16,7 @@ Frontend/dist-ssr/
 
 # --- Secrets / local config — copy the tracked *.example.json and fill it in locally
 Backend/config.json
+Frontend/public/config.json
 test/test.config.json
 
 # --- Local data — SQLite database files (database.connection.storage)

@@ -5,7 +5,7 @@
 //
 //   node scripts/lib/tasks.mjs dev      install if package.json changed → build frontend → migrate
 //   node scripts/lib/tasks.mjs server   check deps + build exist → migrate            (no install/build)
-//   node scripts/lib/tasks.mjs deploy   install if changed → build frontend → migrate (after git pull)
+//   node scripts/lib/tasks.mjs deploy   git pull (clean clone, ff-only) → install if changed → build → migrate
 //
 // Exits non-zero at the first failed step, so the launcher does NOT start the server.
 
@@ -77,6 +77,19 @@ function requireBuild() {
     }
 }
 
+// A deploy pulls first — fast-forward only, and only into a CLEAN clone: local edits to tracked
+// files would make `git pull` refuse halfway, so they are named up front instead.
+function gitPull() {
+    step("git: pulling (fast-forward only)");
+    const status = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], { cwd: ROOT, encoding: "utf8" });
+    if (status.status !== 0) fail(`not a git checkout (git status: ${String(status.stderr).trim()})`);
+    if (status.stdout.trim()) {
+        fail(`this clone has local changes to tracked files — a deploy needs a clean clone:\n${status.stdout.trimEnd()}\n` +
+            "Commit them to the project (if they belong there) or `git checkout -- <file>`, then deploy again.");
+    }
+    check(spawnSync("git", ["pull", "--ff-only"], { cwd: ROOT, stdio: "inherit" }), "git pull --ff-only", ROOT);
+}
+
 async function migrateIfNeeded() {
     const configFile = path.join(BACKEND, "config.json");
     if (!fs.existsSync(configFile)) fail("Backend/config.json is missing — run the wizard (wizard.bat / wizard.sh) first");
@@ -119,6 +132,7 @@ switch (task) {
         await migrateIfNeeded();
         break;
     case "deploy":
+        gitPull();
         installIfChanged(BACKEND);
         installIfChanged(FRONTEND);
         buildFrontend();

@@ -19,7 +19,21 @@ export const ROOT = path.resolve(HERE, "..", "..");
 export const BACKEND = path.join(ROOT, "Backend");
 
 const example = JSON.parse(fs.readFileSync(path.join(BACKEND, "config.example.json"), "utf-8"));
-export const TEST_PORT = example.app.port + 1;
+
+// The test port is THIS project's port + 1 (Ote's port rule: variant 1 of the app's own id), so
+// two projects on one machine never test on the same port. Only app.port is read from
+// Backend/config.json — nothing else from the real config ever reaches a test.
+function projectPort() {
+    try {
+        const raw = fs.readFileSync(path.join(BACKEND, "config.json"), "utf-8").replace(/^﻿/, "");
+        const port = JSON.parse(raw)?.app?.port;
+        if (Number.isInteger(port)) return port;
+    } catch {
+        // no config.json yet (fresh clone, CI) — use the example's port
+    }
+    return example.app.port;
+}
+export const TEST_PORT = projectPort() + 1;
 
 // Temp folders (test configs, test logs) are removed when the test process exits.
 const tempDirs = [];
