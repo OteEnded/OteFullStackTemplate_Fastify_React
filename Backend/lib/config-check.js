@@ -98,6 +98,18 @@ export function checkConfig(config) {
 
     checkAuth(config, problems);
 
+    const files = config?.files;
+    if (files?.enabled) {
+        if (!["local", "bloteb"].includes(files.driver)) problems.push(`files.driver must be "local" or "bloteb"`);
+        if (files.driver === "local" && !(config.security?.secret_box_key?.length >= 32)) {
+            problems.push("files (driver local) needs security.secret_box_key (32+ characters) to sign its read links");
+        }
+        if (files.driver === "bloteb") {
+            for (const key of ["baseUrl", "app"]) if (!files.bloteb?.[key]) problems.push(`files.bloteb.${key} is empty (files.driver is "bloteb")`);
+            if (!String(files.bloteb?.key ?? "").startsWith("bk1.")) problems.push("files.bloteb.key must be the bk1.… private key printed when the app was registered in Bloteb");
+        }
+    }
+
     const boxKey = config?.security?.secret_box_key;
     if (boxKey && boxKey.length < 32) problems.push("security.secret_box_key must be at least 32 characters (or empty if unused)");
 

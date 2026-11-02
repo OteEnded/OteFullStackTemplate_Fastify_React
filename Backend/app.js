@@ -14,6 +14,7 @@ import dbPlugin from './app/plugins/db.js'
 import cronPlugin from './app/plugins/cron.js'
 import authModule from './app/modules/auth/index.js'
 import realtimeModule from './app/modules/realtime/index.js'
+import filesModule from './app/modules/files/index.js'
 import routes from './app/routes/index.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -67,6 +68,7 @@ export async function buildApp(config, overrides = {}) {
   // Optional modules — each is off until enabled in config.json, and removable (see its header).
   await fastify.register(authModule)
   await fastify.register(realtimeModule)
+  await fastify.register(filesModule)
 
   const distDir = join(__dirname, 'public', 'dist')
   if (fs.existsSync(distDir)) {

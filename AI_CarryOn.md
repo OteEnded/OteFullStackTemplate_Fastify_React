@@ -30,12 +30,13 @@ goal, run the wizard, write the project's port here, and append entry #1 to `AI_
 - Database (optional): none · Postgres (SQL migrations own the schema, `npm run db:migrate`, boot guard) ·
   SQLite / MySQL / MariaDB / MSSQL in `sync` mode. Seeds: `npm run db:seed`. Log retention.
 - Optional modules (off until enabled in `Backend/config.json`): **auth** (config root, local users,
-  Login with Oteracount) and **realtime** (SSE + WebSocket from one hub).
+  Login with Oteracount), **realtime** (SSE + WebSocket from one hub) and **files** (uploads: local
+  folder or Bloteb, one API — store only the file id in your rows).
 - `test/`: unit (in-process) + live checks; DB checks need `test/test.config.json`.
 - Frontend: React + Vite + Tailwind 4, warm token theme (light/dark/system), console at `/console`.
 
 ❌ **Not built — don't assume**
-- No file uploads helper. No i18n framework. No admin UI for local users (use `npm run auth:user`).
+- No i18n framework. No admin UI for local users (use `npm run auth:user`).
 - Non-Postgres dialects have no SQL migrations (sync mode only).
 - The demo feature (`template items`) is an EXAMPLE — replace or remove it (the wizard can).
 

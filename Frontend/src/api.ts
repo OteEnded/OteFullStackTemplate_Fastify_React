@@ -94,3 +94,14 @@ export function errorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   return 'Something went wrong.';
 }
+
+/** What the files module returns (Backend/app/modules/files). Store `id`; ask for a fresh `url` when showing it. */
+export type UploadedFile = { id: string; name: string; mime: string; size: number; url: string }
+
+// Uploads a file to POST /api/files (multipart field "file") — the server's optional files module,
+// driver local or Bloteb. No Content-Type header: the browser sets the multipart boundary itself.
+export function uploadFile(file: File, options?: RequestOptions): Promise<UploadedFile> {
+  const body = new FormData()
+  body.append('file', file)
+  return request<UploadedFile>('/api/files', { method: 'POST', body }, options)
+}

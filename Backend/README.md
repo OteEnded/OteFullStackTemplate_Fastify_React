@@ -22,6 +22,7 @@ node server.js --config other.json      # a second instance on another config
 | `app.js` | `buildApp(config)` — builds the app without listening (tests use `inject()`) |
 | `app/plugins/` | `guards` (GET+POST only, cross-site POST refused) · `error-handler` (`{ok:false,message,code}`) · `request-logger` (redacted) · `db` · `cron` (guarded jobs, log retention) |
 | `app/modules/auth/` | OPTIONAL sign-in: config root · local users · Login with Oteracount (`auth.enabled`) |
+| `app/modules/files/` | OPTIONAL uploads: one API (`fastify.files.put / claim / url / bytes / remove`), driver `local` (folder + signed links) or `bloteb` (Ote's file service) (`files.enabled`) |
 | `app/modules/realtime/` | OPTIONAL push: SSE `GET /api/events` + WebSocket `GET /api/ws` (`realtime.*.enabled`) |
 | `app/routes/` | `api/` routes + SPA fallback (file paths 404, page routes → `index.html`) |
 | `database/` | `migrations/NNN_*.sql` (source of truth) · `models/` (mirror them) · `migrate.js` · `schema-guard.js` · `seed.js` · `query.js` |

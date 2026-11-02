@@ -99,6 +99,21 @@
             "enabled": false
         }
     },
+    "files": {
+        "enabled": false,
+        "driver": "local",
+        "max_mb": 10,
+        "types": ["image/*", "application/pdf"],
+        "local": {
+            "directory": "./data/files"
+        },
+        "bloteb": {
+            "baseUrl": "",
+            "internalBaseUrl": "",
+            "app": "",
+            "key": "CHANGE_ME"
+        }
+    },
     "security": {
         "secret_box_key": ""
     },
@@ -124,6 +139,10 @@
         "auth.oteracount": "Login with Oteracount (Ote's OIDC provider). Register the client first — see C:\\data\\Otenization\\Reference\\docs\\GUIDE_OOAuth_for_apps.md. Keys keep the guide's names. redirectUri = <public origin>/api/auth/oteracount/callback, exactly as registered.",
         "auth.roles": "role -> permissions. '*' = everything. Use with fastify.requirePermission('x') on routes.",
         "realtime": "OPTIONAL push to browsers: sse -> GET /api/events, websocket -> GET /api/ws. Both fed by fastify.realtime.publish(channel, type, data). Push only — actions go through the API.",
+        "files": "OPTIONAL uploads (app/modules/files). One API, two drivers: local = a folder + signed links (no other service); bloteb = Ote's file service. Store only the file id in your rows.",
+        "files.types": "Allowed types, checked against the REAL type detected from the bytes (image/* allowed as a family). Empty = any. Unknown bytes are application/octet-stream and always download.",
+        "files.local": "directory relative to Backend/. Needs security.secret_box_key (signs the read links). Unclaimed uploads are purged after 24 h.",
+        "files.bloteb": "Register the app in Bloteb first (GUIDE_Bloteb_for_apps.md §4): app = its slug, key = the bk1.… private key (config.json only, never git). baseUrl = what browsers use; internalBaseUrl = optional, when this backend runs on Bloteb's box.",
         "security.secret_box_key": "Key for lib/crypto-box.js makeBox() — seal recoverable secrets (API keys, SMTP passwords) before storing them. 32+ random chars (wizard generates)."
     }
 }
