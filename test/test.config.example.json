@@ -13,7 +13,11 @@
             "dialect": "postgres"
         }
     },
+    "oteracount": {
+        "repo": ""
+    },
     "_comments": {
+        "oteracount.repo": "Optional: path to an Oteracount checkout (with node_modules), e.g. C:/data/Otenization/Oteracount. Enables checks/oteracount.check.mjs — a real Login with Oteracount round trip against a PRIVATE Oteracount it starts on app.port + 2 with its own schema (oteracount_tmpl_test, dropped after). Your running Oteracount is never touched.",
         "what": "Copy to test.config.json (gitignored) to enable checks/database.check.mjs. Without it, DB checks are SKIPPED, not failed.",
         "schema": "Tests create and DROP the schema \"<project>_test\" (here my_app_test) — never your real schema. Use a non-superuser test account."
     }
