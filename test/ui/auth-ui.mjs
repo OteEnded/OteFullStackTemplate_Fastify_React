@@ -7,7 +7,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { makeChecker } from "../lib/checker.mjs";
 import { testConfig, startServer, stopServer, BACKEND } from "../lib/backend.mjs";
-import { launch, newPage, settle, snap } from "../lib/ui.mjs";
+import { launch, newPage, settle, snap, BROWSER } from "../lib/ui.mjs";
 
 const { check, done } = makeChecker("auth-ui — console gate, sign in, wrong password, sign out");
 
@@ -52,16 +52,24 @@ try {
     await snap(page, "auth-login-error-light-desktop");
 
     await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
+    const loginResponse = page.waitForResponse((r) => r.url().endsWith("/api/auth/login") && r.request().method() === "POST");
     await page.getByRole("button", { name: "Sign in" }).click();
+    const setCookie = (await (await loginResponse).allHeaders())["set-cookie"] ?? "";
     await page.waitForURL(/\/console\/settings$/, { timeout: 8000 });
     check("signing in returns to where the visitor was going (next=)", page.url().endsWith("/console/settings"), page.url());
     await settle(page);
     check("the console shows the signed-in user", await page.getByText("root", { exact: true }).first().isVisible());
     await snap(page, "auth-signed-in-light-desktop");
 
-    const cookies = await page.context().cookies();
-    const session = cookies.find((c) => c.name === `${config.app.slug}_session`);
-    check("the session cookie is HttpOnly + SameSite=Lax", Boolean(session?.httpOnly) && session?.sameSite === "Lax", JSON.stringify(session ?? null));
+    // What the SERVER sends is the contract — checked in every browser.
+    check("the server sets the session cookie HttpOnly + SameSite=Lax",
+        setCookie.includes(`${config.app.slug}_session=`) && /HttpOnly/i.test(setCookie) && /SameSite=Lax/i.test(setCookie), setCookie.replace(/=[^;]{12,}/, "=…"));
+    // What the browser stored: Playwright's WebKit build for Windows has a cookie store without
+    // SameSite support and reports every cookie as "None" (real Safari supports Lax) — skip it there.
+    const session = (await page.context().cookies()).find((c) => c.name === `${config.app.slug}_session`);
+    if (!(BROWSER === "webkit" && process.platform === "win32")) {
+        check("the browser stored it HttpOnly + SameSite=Lax", Boolean(session?.httpOnly) && session?.sameSite === "Lax", JSON.stringify(session ?? null));
+    }
 
     await page.goto(url("/login"));
     await page.waitForURL(/\/console$/, { timeout: 8000 });

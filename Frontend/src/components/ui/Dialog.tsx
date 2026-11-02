@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
-import { backdropPointerDown, backdropPointerUp } from '../../lib/overlay'
+import { backdropPointerDown, backdropPointerUp, openerElement } from '../../lib/overlay'
 import { cx } from '../../lib/cx'
 import { IconButton } from './Button'
 
@@ -51,7 +51,7 @@ function DialogOpen({ title, description, onClose, children, footer, size = 'md'
   useLayoutEffect(() => {
     const dialog = ref.current
     if (!dialog) return
-    const opener = document.activeElement as HTMLElement | null
+    const opener = openerElement()
     if (!dialog.open) dialog.showModal()
     // React's autoFocus runs before showModal (when the dialog is still hidden), so focus is
     // placed here: [data-autofocus] first, else the first field, else the browser's default.
@@ -67,7 +67,8 @@ function DialogOpen({ title, description, onClose, children, footer, size = 'md'
     return () => {
       dialog.removeEventListener('cancel', onCancel)
       if (dialog.open) dialog.close()
-      // Return focus to the opener (if it still exists and nothing else claimed focus).
+      // Return focus to the opener (if it still exists). openerElement() handles Safari, which
+      // focuses the clicked button's ANCESTOR rather than the button (see lib/overlay.ts).
       if (opener && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true })
     }
   }, [])

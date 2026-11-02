@@ -12,6 +12,12 @@ npm run unit            # unit/ only
 npm run checks          # checks/ only
 npm run ui              # everything + ui/ drives  (= test-all --ui; build the frontend first)
 HEADED=1 node ui/console-ui.mjs   # one drive, in a visible browser
+npm run ui:all          # the UI drives in Edge, Firefox AND WebKit (Safari's engine)
+UI_BROWSER=webkit node ui/console-ui.mjs   # one drive in one browser
+```
+Firefox/WebKit need `npx playwright install firefox webkit` once per machine. WebKit is the closest
+to Safari off a Mac (real Safari needs macOS); it caught a real Safari focus bug in the dialog.
+```bash
 ```
 (`npm test` in `Backend/` runs `test-all` too.)
 

@@ -48,3 +48,29 @@ export function backdropPointerUp(e: React.PointerEvent): boolean {
   armed = null // a release anywhere ends the gesture
   return dismiss
 }
+
+// ── Who opened it? ──────────────────────────────────────────────────────────────────────────────
+// Safari (WebKit) does NOT focus a button when it is clicked: focus goes to the nearest focusable
+// ANCESTOR instead (here <main tabindex=-1>, or <body>), so "return focus to the opener" landed on
+// <main> (found by the WebKit UI drive, 2026-11-02 — a focus-event probe showed it). Remember the
+// last control pressed and prefer it when the focused element merely CONTAINS it.
+const CONTROL = 'button, a[href], [role="button"], [role="menuitem"], input, select, textarea, [tabindex]'
+let lastPressed: HTMLElement | null = null
+if (typeof document !== 'undefined') {
+  document.addEventListener(
+    'pointerdown',
+    (e) => {
+      lastPressed = (e.target as Element | null)?.closest<HTMLElement>(CONTROL) ?? null
+    },
+    { capture: true },
+  )
+}
+
+/** The element to return focus to when an overlay closes: the focused one, else the last control pressed. */
+export function openerElement(): HTMLElement | null {
+  const active = document.activeElement as HTMLElement | null
+  const pressed = lastPressed?.isConnected ? lastPressed : null
+  // Safari: the focused element is an ancestor of what was actually pressed → the pressed control.
+  if (pressed && (!active || active === document.body || (active !== pressed && active.contains(pressed)))) return pressed
+  return active && active !== document.body ? active : null
+}

@@ -12,7 +12,8 @@
     "unit": "node --test \"unit/*.test.mjs\"",
     "checks": "node pipeline/test-all.mjs --checks-only",
     "test-all": "node pipeline/test-all.mjs",
-    "ui": "node pipeline/test-all.mjs --ui"
+    "ui": "node pipeline/test-all.mjs --ui",
+    "ui:all": "node pipeline/test-all.mjs --ui --all-browsers"
   },
   "devDependencies": {
     "playwright": "^1.64.1"

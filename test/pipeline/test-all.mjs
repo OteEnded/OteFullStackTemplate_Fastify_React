@@ -22,9 +22,9 @@ if (!fs.existsSync(path.join(ROOT, "..", "Backend", "node_modules"))) {
     process.exit(1);
 }
 
-function run(label, cmdArgs, passTest) {
+function run(label, cmdArgs, passTest, env = {}) {
     const started = Date.now();
-    const r = spawnSync(process.execPath, cmdArgs, { cwd: ROOT, encoding: "utf8" });
+    const r = spawnSync(process.execPath, cmdArgs, { cwd: ROOT, encoding: "utf8", env: { ...process.env, ...env } });
     const out = `${r.stdout ?? ""}${r.stderr ?? ""}`;
     const skipped = /^SKIPPED: (.*)$/m.exec(out);
     const state = skipped ? "SKIP " : r.status === 0 && passTest(out) ? "GREEN" : "RED  ";
@@ -46,10 +46,15 @@ for (const file of fs.readdirSync(checksDir).filter((f) => f.endsWith(".check.mj
     run(`checks/${file}`, [path.join("checks", file)], (out) => /ALL CHECKS PASSED \(\d+\)/.test(out));
 }
 
+// --ui runs the drives in Edge (or UI_BROWSER); --all-browsers runs each in Edge, Firefox and
+// WebKit (Safari's engine) — `npx playwright install firefox webkit` once per machine.
 if (args.has("--ui")) {
     const uiDir = path.join(ROOT, "ui");
-    for (const file of fs.readdirSync(uiDir).filter((f) => f.endsWith("-ui.mjs")).sort()) {
-        run(`ui/${file}`, [path.join("ui", file)], (out) => /ALL CHECKS PASSED \(\d+\)/.test(out));
+    const browsers = args.has("--all-browsers") ? ["edge", "firefox", "webkit"] : [process.env.UI_BROWSER || "edge"];
+    for (const browser of browsers) {
+        for (const file of fs.readdirSync(uiDir).filter((f) => f.endsWith("-ui.mjs")).sort()) {
+            run(`ui/${file} [${browser}]`, [path.join("ui", file)], (out) => /ALL CHECKS PASSED \(\d+\)/.test(out), { UI_BROWSER: browser });
+        }
     }
 }
 

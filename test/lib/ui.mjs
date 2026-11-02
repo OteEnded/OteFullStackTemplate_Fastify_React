@@ -29,10 +29,23 @@ export async function loadPlaywright() {
     }
 }
 
+// UI_BROWSER=edge (default) | firefox | webkit. WebKit is Safari's engine — the closest to Safari
+// that runs on Windows/Linux (real Safari needs macOS). Firefox/WebKit builds come from
+// `npx playwright install firefox webkit` (once per machine).
+export const BROWSER = (process.env.UI_BROWSER || "edge").toLowerCase();
+
 export async function launch() {
-    const { chromium } = await loadPlaywright();
+    const pw = await loadPlaywright();
+    const { chromium } = pw;
     const headed = process.env.HEADED === "1" || process.env.HEADLESS === "0";
     const options = { headless: !headed, slowMo: headed ? 40 : 0 };
+    if (BROWSER === "firefox" || BROWSER === "webkit") {
+        try {
+            return await pw[BROWSER].launch(options);
+        } catch (err) {
+            throw new Error(`${BROWSER} is not installed for Playwright — run \`npx playwright install ${BROWSER}\` in test/ (${err.message.split("\n")[0]})`);
+        }
+    }
     try {
         return await chromium.launch({ ...options, channel: "msedge" });
     } catch {
@@ -68,7 +81,7 @@ export async function settle(page, ms = 250) {
 
 export async function snap(page, name) {
     fs.mkdirSync(SHOTS, { recursive: true });
-    const file = path.join(SHOTS, `${name}.png`);
+    const file = path.join(SHOTS, `${name}${shotSuffix}.png`);
     await page.screenshot({ path: file, fullPage: true });
     return file;
 }
@@ -78,7 +91,14 @@ export async function overflowX(page) {
 }
 
 /** Remove last run's screenshots so the folder only ever holds the current run. */
+// Shots are per browser: Edge's keep their plain names, others get a suffix (dashboard-dark-phone-firefox.png),
+// and clearing only removes the current browser's — so three runs leave three comparable sets.
+const shotSuffix = BROWSER === "edge" ? "" : `-${BROWSER}`;
+
 export function clearShots() {
-    fs.rmSync(SHOTS, { recursive: true, force: true });
     fs.mkdirSync(SHOTS, { recursive: true });
+    for (const file of fs.readdirSync(SHOTS)) {
+        const isOther = /-(firefox|webkit)\.png$/.test(file);
+        if (shotSuffix ? file.endsWith(`${shotSuffix}.png`) : !isOther) fs.rmSync(path.join(SHOTS, file));
+    }
 }
